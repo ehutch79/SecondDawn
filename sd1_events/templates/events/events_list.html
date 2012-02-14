@@ -1,0 +1,190 @@
+{% extends 'events/base.html' %}
+
+{% load url from future %}
+
+{% block title %}Event Registration{% endblock %}
+
+{% block contents %}
+    <div class="span4">
+    stuff
+    </div>
+    <div class="span8" id="registration-form">
+    <div class="alert alert-error">DO NOT USE THIS FORM UNLESS STAFF HAS ASKED FOR HELP TESTING</div>
+    <form class="form form-horizontal" id="payment-form" method="POST" action="{% url 'register_for_events' %}">
+        <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>BGA Deadline</th>
+                <th>Build Deadline</th>
+                <th>Game On</th>
+
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr>
+
+                <td class="event-name">{{ event }}</td>
+                <td>{{ event.bga_blackout_start }}</td>
+                <td>{{ event.build_blackout_start }}</td>
+                <td>{{ event.event_start }}</td>
+
+                <td>{% if event.pk not in reged_events %}
+                    <select style="width: auto" name="reg_option">
+                        <option value="">--</option>
+                        {% for option in event.registrationoptions_set.all %}
+                            {% if not option.limit or option.eventregistration_set.all.count < option.limit %}
+                                <option value="{{ option.pk }}">{{ option.name }}{% if option.cost > 0 %} - ${{ option.cost }}{% endif %}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% else %}Registered{% endif %}
+                </td>
+
+            </tr>
+        {% empty %}
+        <tr><td colspan="5">There are no upcoming events</td></tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        
+        {% if user.character_set.count < 2 and user.character_set.all.0.is_new %}
+            <div class="alert alert-info">New players will receive a discount on their first event automatically. Contact <a href="mailto:seconddawnlarp@gmail.com">staff</a> for more info</div>
+        {% endif %}
+
+        {% if events.count %}
+        <div class="control-group">
+            <label class="control-label">Payment Method</label>
+            <div class="controls">
+                <label class="radio"><input type="radio" name="payment-type" value="cash"> Cash</label>
+                <label class="radio"><input checked="checked" type="radio" name="payment-type" value="cc"> Credit Card</label>
+                <label class="radio"><input type="radio" name="payment-type" value="paypal" disabled="disabled"> Paypal</label>
+            </div>
+        </div>
+
+        <div id="cc-form">
+            <div class="control-group">
+                <label class="control-label">Card Number</label>
+                <div class="controls">
+                    <input style="width: auto" type="text" size="20" autocomplete="off" class="card-number numeric"/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Security Code</label>
+                <div class="controls">
+                    <input style="width: auto" type="text" size="4" autocomplete="off" class="card-cvc numeric"/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Expiration (MM/YYYY)</label>
+                <div class="controls">
+                    <input style="width: auto"  type="text" size="2" class="card-expiry-month numeric"/>
+                    <span> / </span>
+                    <input style="width: auto"  type="text" size="4" class="card-expiry-year numeric"/>
+                </div>
+            </div>
+        </div>
+    <div class="alert alert-error payment-errors" style="display: none;"></div>
+    
+    {% csrf_token %}
+    <div class="form-actions" style="text-align: right"><input type='submit' disabled="disabled" class="btn btn-primary" id="register-for-event" value="Register"></div>
+    {% endif %}
+    </form>
+    
+    </div>
+
+{% endblock %}
+
+{% block extra-body-js %}
+{{ block.super }}
+<script type="text/javascript">
+    function check_form(event) {
+        $('#register-for-event').attr('disabled', 'disabled');
+        var chose_event = false
+
+        selects = $('#registration-form select');
+        $.each(selects, function(idx, val) {
+            select = $(selects[idx]);
+            
+            if( select.val() ) { 
+                $('#register-for-event').removeAttr('disabled'); 
+                return true;
+            }
+
+        });
+
+        return false;
+    }
+
+    function stripeResponseHandler(status, response) {
+        if (response.error) {
+            
+            //show the errors on the form
+            $(".payment-errors").html(response.error.message);
+            $('.payment-errors').show();
+            $('#register-for-event').removeAttr('disabled');
+            $('.waiting_msg').remove();
+
+        } else {
+            $('.payment-errors').hide();
+            var form$ = $("#payment-form");
+            // token contains id, last4, and card type
+            var token = response['id'];
+            // insert the token into the form so it gets submitted to the server
+            form$.append("<input type='hidden' id='stripeToken' name='stripeToken' value='" + token + "'/>");
+            // and submit
+
+            
+            form$.get(0).submit();
+        }
+    }
+</script>
+{% endblock %}
+
+{% block extra-js %}
+    $('input[name=payment-type]').on('change', function(event) {
+        target = $(event.target);
+        if(target.val() != 'cc') { $('#cc-form').hide(); }
+        if(target.val() != 'paypal') { $('#paypal-form').hide(); }
+
+        if(target.val() == 'cc') { $('#cc-form').show(); }
+        if(target.val() == 'paypal') { $('#paypal-form').show(); }
+    });
+
+    $('#registration-form').on('blur', 'input.numeric', function(event) {
+        $(event.target).val($(event.target).val().replace(/[^0-9\.]/g,''));
+    });
+
+    $('#registration-form').on('keyup', 'input.numeric', function(event) {
+        $(event.target).val($(event.target).val().replace(/[^0-9\.]/g,''));
+    });    
+
+    $('#registration-form').on('change', 'select', function(event) {
+        return check_form(event);
+    });
+    
+    $("#payment-form").submit(function(event) {
+        $('#register-for-event').attr("disabled", "disabled");
+
+        if($('input[name=payment-type]:checked').val() == 'cc') {
+            $('.form-actions').prepend($('<span class="waiting_msg">Registering...  </span>'));
+
+            Stripe.createToken({
+                number: $('.card-number').val(),
+                cvc: $('.card-cvc').val(),
+                exp_month: $('.card-expiry-month').val(),
+                exp_year: $('.card-expiry-year').val()
+            }, stripeResponseHandler);
+
+            // prevent the form from submitting with the default action
+            return false;
+        } else {
+            console.log('not a cc');
+            return false;
+        }
+    });
+
+    check_form();
+{% endblock %}

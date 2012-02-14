@@ -1,0 +1,1015 @@
+{% extends 'condenser/base.html' %}
+
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}{% if char %}{{ char.name }}{% else %}Create Character{% endif %}{% endblock %}
+
+{% block contents %}
+
+    <div id="char_view" class="char">
+
+
+    </div>
+
+{% endblock contents %}
+
+
+<script type="text/javascript">
+{% block extra-js %}
+    function calc_build_cost($current, $end) {
+        if($current == $end) { return 0; }
+        $start = parseInt($current) + 1;
+        $end = parseInt($end);
+        
+        $term = ($end-$current)
+        $factor = ($term)/2;
+        $base = (2 * $start) + ($term - 1);
+        return $factor * $base;
+    }
+
+
+    var Char = Backbone.Model.extend({
+        urlRoot: "/condenser/char/api/v1/char/",
+        defaults: {
+            build_cap: 50
+        }
+    });
+
+    var Skill = Backbone.Model.extend({
+        urlRoot: "/condenser/char/api/v1/skills/"
+    });
+
+    var Skills = Backbone.Collection.extend({
+        url: "/condenser/char/api/v1/skills/"  
+    });
+
+    var SkillBought = Backbone.Model.extend({
+        
+    });
+
+    var SkillsBought = Backbone.Collection.extend({
+        model: SkillBought 
+    });
+
+    var Profession = Backbone.Model.extend({
+        urlRoot: "/condenser/char/api/v1/professions/"
+    });
+
+    var Professions = Backbone.Collection.extend({
+        url: "/condenser/char/api/v1/professions/"  
+    });
+
+    var ProfessionBought = Backbone.Model.extend({
+        
+    });
+
+    var ProfessionsBought = Backbone.Collection.extend({
+        model: ProfessionBought
+    });
+
+    var Chars = Backbone.Collection.extend({
+        model: Char,
+        url: "/character/api/v1/char/"
+    });
+
+    var BuildView = Backbone.View.extend({
+
+
+        initialize: function() {
+            _.bindAll(this, 'render');
+            
+            this.template = _.template($('#build-template').html());
+            this.model.bind('change', this.render);
+        },
+        render: function() {
+            percent = 0;
+            range = this.model.attributes.free_build + this.model.attributes.build_spent;
+            upper_bound = this.model.attributes.build_cap;
+            if (range < upper_bound) { upper_bound = range; }
+            percent = (this.model.attributes.build_spent / upper_bound ) * 100;
+
+            this.$el.empty();
+            this.$el.html(this.template({
+                    build_cap: this.model.attributes.build_cap, 
+                    char: this.model.attributes, 
+                    orig: this.model.orig.attributes,
+                    percent: percent
+                }));
+            return this;
+        },
+
+    });
+    var AttrView = Backbone.View.extend({
+
+        events: { 
+            'click .btn.increase': 'raise',
+            'click .btn.decrease': 'lower',
+            'click .btn.reset': 'reset'
+        },    
+
+        initialize: function() {
+            _.bindAll(this, 'render', 'lower', 'raise', 'reset');
+            
+            this.template = _.template($('#attr-template').html());
+            this.model.bind('change', this.render);
+
+        },
+        render: function() {
+            this.$el.empty();
+            this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
+            return this;
+        },
+
+        lower: function(e) {
+            target = $(e.target);
+            attr = target.parents('tr').first().attr('data-attr');
+            cost = parseInt(target.siblings('.to_buy').first().text());
+            this.model.attributes[attr] -= 1;
+            this.model.attributes.build_spent -= cost;
+            this.model.attributes.free_build += cost;
+            this.model.change();
+            char_view.model.dirty = true;
+        },
+
+        raise: function(e) {
+            target = $(e.target);
+            attr = target.parents('tr').first().attr('data-attr');
+            cost = parseInt(target.siblings('.to_buy').first().text()) + 1;
+            if(char_view.model.attributes.build_spent + cost > char_view.model.attributes.build_cap) { return false; }
+
+
+            this.model.attributes[attr] += 1;
+            this.model.attributes.build_spent += cost;
+            this.model.attributes.free_build -= cost;
+            this.model.change();
+            char_view.model.dirty = true;
+        },
+
+        reset: function(e) {
+            cost = 0;
+            cost += calc_build_cost(this.model.orig.attributes.blood, this.model.attributes.blood);
+            this.model.attributes.blood = this.model.orig.attributes.blood;
+
+            cost += calc_build_cost(this.model.orig.attributes.might, this.model.attributes.might);
+            this.model.attributes.might = this.model.orig.attributes.might;
+
+            cost += calc_build_cost(this.model.orig.attributes.mind, this.model.attributes.mind);
+            this.model.attributes.mind = this.model.orig.attributes.mind;
+
+            cost += calc_build_cost(this.model.orig.attributes.finesse, this.model.attributes.finesse);
+            this.model.attributes.finesse = this.model.orig.attributes.finesse;
+
+            cost += calc_build_cost(this.model.orig.attributes.will, this.model.attributes.will);
+            this.model.attributes.will = this.model.orig.attributes.will;
+
+            this.model.attributes.free_build += cost;
+            this.model.attributes.build_spent -= cost;
+            
+            this.model.change();
+        }
+
+    });
+
+    var SkillBoughtView = Backbone.View.extend({
+        
+        events: { 
+          'click .btn.refund': 'removeSkill'
+        }, 
+        initialize: function () {
+            _.bindAll(this, 'render', 'unrender', 'removeSkill');
+            
+            this.template = _.template($('#skill-bought-template').html());
+            this.model.bind('remove', this.unrender);
+        },
+        render: function () {
+            this.$el.html(this.template({skill: this.model.attributes}));
+            return this;
+        },
+        unrender: function (){
+            this.$el.remove();
+        },
+        removeSkill: function (e){
+            var is_required = false;
+            
+            for( skill_idx in this.collection.models ) {
+                skill = this.collection.models[skill_idx];
+                
+                if(skill.attributes.skill.required_skills.length) {
+                    for( req_idx in skill.attributes.skill.required_skills) {
+                        if (this.model.attributes.skill.id == skill.attributes.skill.required_skills[req_idx].id) {
+                            is_required = true;
+                            alert( this.model.attributes.skill.name + ' is required by ' + skill.attributes.skill.name);
+                        }
+                    }
+                }
+            }
+
+            if(!is_required) {
+                this.collection.remove(this.model);
+            }
+        }
+        
+    });
+
+
+    var SkillsBoughtView = Backbone.View.extend({
+        skill_views: [],
+
+        initialize: function() {
+            _.bindAll(this, 'render', 'addSkill', 'refundSkill');
+            
+            this.collection = new SkillsBought();
+            
+            _.each(this.model.attributes.skills, function (skill) {
+                skillbought = new SkillBought(skill);
+                skillbought.id = skillbought.get('id');
+                
+                this.collection.add(skillbought);
+            }, {collection: this.collection});
+            this.collection.bind('remove', this.refundSkill);
+            //this.collection.bind('change', this.refundSkill);
+            this.template = _.template($('#skill-bought-list-template').html());
+
+        },
+        render: function() {
+            var self = this
+            this.$el.empty();
+            this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
+
+            _.each(this.collection.models, function(skill) { 
+                self.addSkill(skill); 
+            });
+            return this;
+        },
+        addSkill: function(skill, removable) {
+            
+            var itemView = new SkillBoughtView({ el: $('<tr></tr>'), model: skill, collection: this.collection });
+            itemView.render();
+            if(removable==true) {
+                itemView.$el.find('.removable').html('<button class="btn refund">Remove</button>');
+            }
+            this.skill_views.push(itemView);
+            this.$el.find('tbody').first().append(itemView.$el);
+        },
+        refundSkill: function(skill) {
+            
+            if(skill.attributes.paid_total) {
+                this.model.attributes.build_spent -= skill.attributes.paid_total;
+                this.model.attributes.free_build += skill.attributes.paid_total;
+                
+            }
+            this.model.change();
+            char_view.model.dirty = true;
+        }
+
+    });
+
+    var SkillView = Backbone.View.extend({
+        tagName: 'tr',
+        events: {
+            'click .btn.buy_skill': 'buy_skill'
+        },
+        initialize: function(){
+            _.bindAll(this, 'render', 'buy_skill'); // every function that uses 'this' as the current object should be in here
+            this.template = _.template($('#skill-item-template').html());
+            
+        },
+        render: function() {
+            
+            this.$el.html(this.template({ skill: this.model.attributes }));
+            return this;
+        },
+        buy_skill: function(e) {
+            if(this.model.attributes.build_cost > char_view.model.attributes.free_build) { return false; }
+            if(char_view.model.attributes.build_spent + this.model.attributes.build_cost > char_view.model.attributes.build_cap) { return false; }
+
+            var skillbought = new SkillBought({
+                paid_total: this.model.attributes.build_cost,
+                skill: this.model.attributes
+            });
+            
+            
+
+            char_view.skills_bought_list_view.addSkill(skillbought, true);
+            char_view.skills_bought_list_view.collection.add(skillbought);
+            char_view.model.attributes.free_build -= this.model.attributes.build_cost
+            char_view.model.attributes.build_spent += this.model.attributes.build_cost
+            
+            if(this.model.attributes.grants.length) {
+                _.each(this.model.attributes.grants, function(skill) {
+                    
+                    var skillbought = new SkillBought({
+                        paid_total: 0,
+                        skill: skill,
+                        bundled_from: this.model.attributes
+                    });
+                    char_view.skills_bought_list_view.addSkill(skillbought);
+                    char_view.skills_bought_list_view.collection.add(skillbought);
+                }, {model: this.model});
+            }
+
+
+            char_view.model.change();
+            char_view.skills_list_view.render();
+            char_view.model.dirty = true;
+        }
+
+    });
+
+    var SkillsView = Backbone.View.extend({
+        
+        skill_views: [],
+        initialize: function(){
+            _.bindAll(this, 'render', 'addSkill'); // every function that uses 'this' as the current object should be in here
+            this.collection = new Skills();
+            this.collection.fetch({ success: function(collection, response) { char_view.skills_list_view.render(); } });
+
+            this.template = _.template($('#skill-list-template').html());
+            this.model.bind('change', this.render);
+            this.collection.bind('change', this.render);
+            
+        },
+        render: function() {
+            
+            self = this;
+            this.skill_views = [];
+            this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
+            
+            _.each(this.collection.models, function(skill) { 
+
+                self.addSkill(skill); 
+            });
+
+            return this;
+        },
+        addSkill: function(skill) {
+            var can_buy_skill = true;
+            var show_skill = true;
+
+            if(skill.attributes.build_cost > this.model.attributes.free_build) { can_buy_skill = false; }
+            if(char_view.model.attributes.build_spent + skill.attributes.build_cost > char_view.model.attributes.build_cap) { can_buy_skill = false; }
+            
+            required_uris = {};
+            if(skill.attributes.required_skills.length) {
+                _.each(skill.attributes.required_skills, function(req) {
+                    required_uris[req.resource_uri] = 1; 
+                });
+            }
+            _.each(char_view.skills_bought_list_view.collection.models, function (skillbought) {    
+                if(skillbought.attributes.skill.id == skill.attributes.id) {
+                    show_skill = false;
+                }
+
+                if(skillbought.attributes.skill.resource_uri in required_uris) {
+                    delete required_uris[skillbought.attributes.skill.resource_uri]
+                }
+            });
+            
+            required_uris_size = Object.size(required_uris);
+
+            if(required_uris_size) { can_buy_skill = false; }
+
+            if(skill.attributes.headers.length) {
+                has_header = false;
+                _.each(skill.attributes.headers, function (header) {
+                    
+                    
+                    _.each(this.model.attributes.headers, function (header) {
+                        if(this.matching_header.id == header.id) {
+                            has_header = true;
+                        }
+                    },{matching_header: header});
+
+                    
+                }, {model: this.model});
+                if(!has_header) { show_skill = false; }
+            }
+
+            if(show_skill) {
+                var itemView = new SkillView({ model: skill, collection: this.collection });
+                itemView.render();
+                if(!can_buy_skill) {
+                    itemView.$el.addClass('can-not-buy');
+                    button = itemView.$el.find('.btn.buy_skill');
+                    row = button.parent();
+                    button.remove();
+                }
+                this.skill_views.push(itemView);
+                this.$el.find('tbody').first().append(itemView.$el);
+            }
+        }
+    });
+
+
+    function prof_score_culm_cost(score) {
+        cost = 0;
+        while(score > 5) {
+            cost += prof_score_cost(score);
+            score -= 1;
+        }
+
+        return cost;
+    }
+
+    function prof_score_cost(score) {
+        cost = parseInt(score/10);
+        if(score%10) { cost += 1; }
+
+        return cost;
+    }
+
+    var ProfessionBoughtView = Backbone.View.extend({
+        events: { 
+            'click .increase': 'raise',
+            'click .decrease': 'lower',
+            'click .btn.refund': 'removeProfession'
+        }, 
+        initialize: function () {
+            _.bindAll(this, 'render', 'unrender', 'removeProfession', 'raise', 'lower');
+            this.char = char_view.model;
+            this.template = _.template($('#profession-bought-template').html());
+            this.model.bind('remove', this.unrender);
+            this.model.bind('change', this.render);
+            char_view.model.bind('change', this.render);
+            if(!this.model.attributes.orig_score) { this.model.attributes.orig_score = this.model.attributes.score; }
+        },
+        render: function () {
+            this.$el.html(this.template({profession: this.model.attributes, char: char_view.model.attributes, next_cost: prof_score_cost(this.model.attributes.score+1) }));
+            if(this.model.attributes.removable==true) {
+                this.$el.find('.removable').html('<button class="btn refund">Remove</button>');
+            }
+            return this;
+        },
+        unrender: function (){
+            this.$el.remove();
+        },
+        removeProfession: function (e){
+            this.collection.remove(this.model);
+        },
+        lower: function(e) {
+            cost = prof_score_cost(this.model.attributes.score);
+            if(this.model.attributes.orig_score >= this.model.attributes.score) { return false; }
+            this.model.attributes.score -= 1;
+            char_view.model.attributes.build_spent -=  cost;
+            char_view.model.attributes.free_build += cost;
+            this.model.change();
+            char_view.model.change();
+            char_view.model.dirty = true;
+        },
+
+        raise: function(e) {
+            
+            cost = prof_score_cost(this.model.attributes.score + 1);
+
+            if(char_view.model.attributes.build_spent + cost > char_view.model.attributes.build_cap) { return false; }
+            if(char_view.model.attributes.free_build < cost) { return false; }
+            this.model.attributes.score += 1;
+            char_view.model.attributes.build_spent +=  cost;
+            char_view.model.attributes.free_build -= cost;
+            this.model.change();
+            char_view.model.change();
+            char_view.model.dirty = true;
+        }
+        
+    });
+
+
+    var ProfessionsBoughtView = Backbone.View.extend({
+        profession_views: [],
+
+        initialize: function() {
+            _.bindAll(this, 'render', 'addProfession', 'refundProfession');
+            
+            this.collection = new ProfessionsBought();
+            
+            _.each(this.model.attributes.professions, function (profession) {
+                professionbought = new ProfessionBought(profession);
+                professionbought.id = professionbought.get('id');
+                
+                this.collection.add(professionbought);
+            }, {collection: this.collection});
+            this.collection.bind('remove', this.refundProfession);
+            
+            this.template = _.template($('#profession-bought-list-template').html());
+
+        },
+        render: function() {
+            var self = this
+            this.$el.empty();
+            this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
+
+            _.each(this.collection.models, function(profession) { 
+                self.addProfession(profession); 
+            });
+            return this;
+        },
+        addProfession: function(profession, removable) {
+            
+            var itemView = new ProfessionBoughtView({ el: $('<tr></tr>'), model: profession, collection: this.collection });
+            if(removable) { itemView.model.attributes.removable = true; }
+            itemView.render();
+
+            this.profession_views.push(itemView);
+            this.$el.find('tbody').first().append(itemView.$el);
+        },
+        refundProfession: function(profession) {
+            build_cost = (char_view.professions_bought_list_view.collection.models.length+1) * 3;
+            build_cost += prof_score_culm_cost(profession.attributes.score);
+            this.model.attributes.build_spent -= build_cost;
+            this.model.attributes.free_build += build_cost;
+        
+            this.model.change();
+            char_view.model.dirty = true;
+        }
+
+    });
+
+
+    var ProfessionView = Backbone.View.extend({
+
+        events: {
+            'click .btn.buy_profession': 'buy_profession'
+        },
+        initialize: function(){
+            _.bindAll(this, 'render', 'buy_profession'); // every function that uses 'this' as the current object should be in here
+            this.template = _.template($('#profession-item-template').html());
+            
+        },
+        render: function() {
+            
+            this.$el.html(this.template({ profession: this.model.attributes }));
+            return this;
+        },
+        buy_profession: function(e) {
+            if(char_view.professions_bought_list_view.collection.models.length >=3 ) { return false; }
+
+            build_cost = (char_view.professions_bought_list_view.collection.models.length+1) * 3;
+            if( build_cost > char_view.model.attributes.free_build) { return false; }
+            if(char_view.model.attributes.build_spent + build_cost > char_view.model.attributes.build_cap) { return false; }
+            
+            var professionbought = new ProfessionBought({
+                score: 5,
+                orig_score: 5,
+                profession: this.model.attributes,
+                paid_total: 0
+            });
+            
+            char_view.professions_bought_list_view.addProfession(professionbought, true);
+            char_view.professions_bought_list_view.collection.add(professionbought);
+            char_view.model.attributes.free_build -= build_cost
+            char_view.model.attributes.build_spent += build_cost
+            
+            char_view.model.change();
+            char_view.professions_list_view.render();
+            char_view.model.dirty = true;
+        }
+
+    });
+
+    var ProfessionsView = Backbone.View.extend({
+
+        
+        profession_views: [],
+        initialize: function(){
+            _.bindAll(this, 'render', 'addProfession'); // every function that uses 'this' as the current object should be in here
+            this.collection = new Professions();
+            this.collection.fetch({ success: function(collection, response) { char_view.professions_list_view.render(); } });
+
+            this.template = _.template($('#profession-list-template').html());
+            this.model.bind('change', this.render);
+            this.collection.bind('change', this.render);
+            
+        },
+        render: function() {
+            
+            self = this;
+            this.profession_views = [];
+            this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
+            
+            _.each(this.collection.models, function(profession) { 
+
+                self.addProfession(profession); 
+            });
+
+            return this;
+        },
+        addProfession: function(profession) {
+            var can_buy_profession = true;
+            var show_profession = true;
+            if(char_view.professions_bought_list_view.collection.models.length >= 3) { can_buy_profession = false; }
+            
+            build_cost = (3 * (char_view.professions_bought_list_view.collection.models.length+1) )
+            if(this.model.attributes.free_build <= build_cost ) { can_buy_profession = false; }
+            if(char_view.model.attributes.build_spent + build_cost > char_view.model.attributes.build_cap) { can_buy_profession = false; }
+
+            _.each(char_view.professions_bought_list_view.collection.models, function (professionbought) {    
+                if(professionbought.attributes.profession.id == profession.attributes.id) {
+                    show_profession = false;
+                }
+            });
+            
+            if(show_profession) {
+                var itemView = new ProfessionView({ el: $('<tr></tr>'), model: profession, collection: this.collection });
+                itemView.render();
+                if(!can_buy_profession) {
+                    itemView.$el.addClass('can-not-buy');
+                    button = itemView.$el.find('.btn.buy_profession');
+                    row = button.parent();
+                    button.remove();
+                }
+                this.profession_views.push(itemView);
+                this.$el.find('tbody').first().append(itemView.$el);
+            }
+        }
+    });
+
+
+    var CharView = Backbone.View.extend({
+        events: {
+            'click .save-char': 'save_char'  
+        },
+        initialize: function(){
+            _.bindAll(this, 'render', 'save_char'); // every function that uses 'this' as the current object should be in here
+            this.template = _.template($('#char-template').html());
+            this.faction_template = _.template($('#faction-list-template').html());
+            this.header_template = _.template($('#header-list-template').html());
+            this.model = new Char();
+
+
+        },
+
+        render: function() {
+            
+            this.$el.empty();
+            this.$el.addClass('char-view');
+            this.$el.append(this.template(this.model.attributes));
+
+            this.build_view = new BuildView({ el: $(this.$el).find(".build-block"), model: this.model });
+            this.build_view.render();
+            
+            this.attr_view = new AttrView({ el: $(this.$el).find(".attr-block").first(), model: this.model });
+            this.attr_view.render();
+
+            this.skills_bought_list_view = new SkillsBoughtView({ el: $(this.$el).find(".skill-block").first(), model: this.model });
+            this.skills_bought_list_view.render();
+            
+            this.skills_list_view = new SkillsView({ el: $('#skills-popup'), model: this.model });
+            this.skills_list_view.render();
+            
+            this.professions_bought_list_view = new ProfessionsBoughtView({ model: this.model });
+            this.professions_bought_list_view.setElement($(this.$el).find(".profession-block").first());
+            this.professions_bought_list_view.render();
+
+            this.professions_list_view = new ProfessionsView({ model: this.model });
+            this.professions_list_view.setElement($(this.$el).find('#profession-popup').first());
+            this.professions_list_view.render();
+
+
+            _.each(this.model.attributes.factions, function (faction) {
+                $('.faction-block').append(this.faction_template({char: this.model.attributes, faction: faction}));
+            }, {model: this.model, faction_template: this.faction_template});
+
+            _.each(this.model.attributes.headers, function (header) {
+                $('.header-block').append(this.header_template({char: this.model.attributes, header: header}));
+            }, {model: this.model, header_template: this.header_template});
+
+            return this;
+
+        },
+        save_char: function(e) {
+            $('.save-char').attr('disabled','disabled');
+
+            var data = {
+                blood: this.model.attributes.blood - this.model.orig.attributes.blood,
+                might: this.model.attributes.might - this.model.orig.attributes.might,
+                mind: this.model.attributes.mind - this.model.orig.attributes.mind,
+                finesse: this.model.attributes.finesse - this.model.orig.attributes.finesse,
+                will: this.model.attributes.will - this.model.orig.attributes.will,
+                background: $('#background-input').val(),
+                skills: [],
+                professions: []
+            }
+
+            {% if user.is_superuser %}
+                if($('#background-approved').val() == 'true') {
+                    data.background_approved = true
+                }
+            {% endif %}
+
+            _.each(this.skills_bought_list_view.collection.models, function (skill) {
+                if(skill.attributes.bundled_from == null) {
+                    data.skills.push(skill.attributes.skill.id);
+                } 
+            });
+
+            _.each(this.professions_bought_list_view.collection.models, function (profession) {
+                
+                    blah = {};
+                    blah[profession.attributes.profession.id] = profession.attributes.score
+                    data.professions.push(blah);
+            });
+
+
+
+            
+            $.ajax('{% url 'condenser_char_attr_adjust' slug=char.slug %}',{
+                type: 'POST',
+                data: data,
+                success: function() {
+                    char_view.model.dirty = false;
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
+    window.char_view = new CharView({ el: $('#contents') });
+    char_view.model.set({id: '{{ char.pk }}'});
+    char_view.model.fetch({ success: function(model, response) {console.log(model); char_view.model.dirty = false; char_view.model.orig = model.clone(); char_view.render(); } });
+
+    $(window).bind('beforeunload', function(){
+      if(char_view.model.dirty) {
+          return 'You have unsaved changes to this character, are you sure you want to leave?';
+        }
+    });
+
+{% endblock %}
+</script>
+
+{% block extra-body-js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/libs/underscore-1.3.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/libs/backbone-0.9.0.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/libs/backbone-tastypie-20120102.js"></script>
+
+<script id="char-template" type="text/html">
+    <div class="span6">
+        <div class="row">
+            <h2 class="char_name span4"><%= name %>
+                <% if(is_new) { %><span class="label label-success">new</span><% } %>
+                <% if(is_npc) { %><span class="label label-notice">npc</span><% } %>
+                <% if(is_retired) { %><span class="label label-important">retired</span><% } %>
+                <% if(is_deceased) { %><span class="label label-important">deceased</span><% } %>
+            </h2>
+            <div class="span2 char_actions">
+                <span class="btn-group pull-right">
+                    <button class="btn save-char">Save</button>
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a>Exchange XP for build</a></li>
+                        <li><a>Retire Character</a></li>
+                    </ul>
+                </span>
+            </div>
+        </div>
+{% if user.is_staff or user.is_superuser %}<div>Player: <a><%= user.first_name %> <%= user.last_name %></a> ( <a href="mailto:<%= user.email %>"><%= user.email %></a> )</div>{% endif %}
+        <h3>Attributes:</h3>
+        <div class="attr-block"></div>
+
+        <h3>Skills:</h3>
+        <div class="skill-block"></div>
+
+    </div>
+
+    <div class="span6">
+        <div class="build-block"></div>        
+        
+        <div class="faction-block">
+            <h3>Faction<% if(factions.length > 1 ) { %>s<% } %>:</h3>
+        </div>
+        <br>
+        <div class="header-block">
+            <h3>Header<% if(headers.length > 1 ) { %>s<% } %>:</h3>
+        </div>
+        <br>
+        <h3>Professions:</h3>
+        <div class="profession-block">
+        </div>
+        <br>
+        <h3>Background:</h3>
+        <div class="background-block">
+            <% if(!background_approved) { 
+                %><textarea name="background" id="background-input"><%= background %></textarea>
+                {% if user.is_superuser %}<input type="checkbox" value="true" name="background_approved" id="background-approved"> Approve Background {% endif %}
+            <% } else { %>
+                <%= background %>
+
+            <% } %>
+
+        </div>
+
+        <div class="form-actions"><button class="btn btn-info save-char">Save</button> <span>Please note that once you save you will be unable to remove skills or reduce attributes without going through staff</span>
+
+        </div>
+
+    </div>
+    <div id="skills-popup" class="modal fade hide"></div>
+    <div id="profession-popup" class="modal fade hide"></div>
+    <div id="eeps-popup" class="modal fade hide"></div>
+
+</script>
+
+<script id="build-template" type="text/html">
+    <div class="row">
+        <span class="span3">Build Remaining: <%= char.free_build %>, Build Cap: <%= build_cap %></span>
+        <div class="span3">
+            <div class="progress">
+              <div class="bar" style="width: <%= percent %>%;"><% if(percent>25) { %>Spent: <% } %><%= char.build_spent %></div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="attr-template" type="text/html">
+<table class="table attributes {% if char.user == user or user.is_staff or user.is_superuser %}editable {% endif %}">
+
+        <tr class="char_attr" data-attr="blood">
+            <td class="attr_name">Blood</td>
+            <td class="attr_value"><%= char.blood %></td>
+            <td class="attr_buy btn-group">
+                <div>
+                    <button class="btn <% if(char.blood > orig.blood) { %>decrease btn-danger<% } %>">-</button>
+                    <span class="to_buy btn"><%= char.blood %></span>
+                    <button class="btn <% if(char.free_build >= (char.blood+1)) { %>increase btn-success<% } %>">+</button>
+                </div>
+            </td>
+        </tr>
+
+        <tr class="char_attr" data-attr="might">
+            <td class="attr_name">Might</td>
+            <td class="attr_value"><%= char.might %></td>
+            <td class="attr_buy btn-group">
+                <div>
+                    <button class="btn <% if(char.might > orig.might) { %>decrease btn-danger<% } %>">-</button>
+                    <span class="to_buy btn"><%= char.might %></span>
+                    <button class="btn <% if(char.free_build >= (char.might+1)) { %>increase btn-success<% } %>">+</button>
+                </div>
+            </td>
+        </tr>
+
+        <tr class="char_attr" data-attr="mind">
+            <td class="attr_name">Mind</td>
+            <td class="attr_value"><%= char.mind %></td>
+            <td class="attr_buy btn-group">
+                <div>
+                    <button class="btn <% if(char.mind > orig.mind) { %>decrease btn-danger<% } %>">-</button>
+                    <span class="to_buy btn"><%= char.mind %></span>
+                    <button class="btn <% if(char.free_build >= (char.mind+1)) { %>increase btn-success<% } %>">+</button>
+                </div>
+            </td>
+        </tr>
+
+        <tr class="char_attr" data-attr="finesse">
+            <td class="attr_name">Finesse</td>
+            <td class="attr_value"><%= char.finesse %></td>
+            <td class="attr_buy btn-group">
+                <div>
+                    <button class="btn <% if(char.finesse > orig.finesse) { %>decrease btn-danger<% } %>">-</button>
+                    <span class="to_buy btn"><%= char.finesse %></span>
+                    <button class="btn <% if(char.free_build >= (char.finesse+1)) { %>increase btn-success<% } %>">+</button>
+                </div>
+            </td>
+        </tr>
+
+        <tr class="char_attr" data-attr="will">
+            <td class="attr_name">Will</td>
+            <td class="attr_value"><%= char.will %></td>
+            <td class="attr_buy btn-group">
+                <div>
+                    <button class="btn <% if(char.will > orig.will) { %>decrease btn-danger<% } %>">-</button>
+                    <span class="to_buy btn"><%= char.will %></span>
+                    <button class="btn <% if(char.free_build >= (char.will+1)) { %>increase btn-success<% } %>">+</button>
+                </div>
+            </td>
+        </tr>
+
+        <tr class="char_attr">
+            <td class="attr_name"></td>
+            <td class="attr_buy"><div><button class="btn reset">Reset All</button></div></td>
+        </tr>
+</table>
+</script>
+
+<script id="skill-bought-list-template" type="text/html">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Skill Name</th>
+                <th>Activation Cost</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="2"></td><td><a data-toggle="modal" data-target="#skills-popup">Add New Skill</a></td></tr>
+        </tbody>
+    </table>
+</script>
+<script id="skill-bought-template" type="text/html">
+        <td><%= skill.skill.name %></td>
+        <td><%= skill.skill.activation %></td>
+        <td class="removable"><div>{% if user.is_staff or user.is_superuser %}<% if(!skill.bundled_from) { %><button class="btn refund btn-danger">Refund</button><% } %>{% endif %}</div></td>
+</script>
+
+<script id="skill-list-template" type="text/html">
+            <div class="modal-header">
+                <h3>Add new skills 
+                    <span class="free_build for_skill_buy"> Free build: <span class="free-build-total"><%= char.free_build %></span></span>
+                </h3>
+            </div>
+            <div class="modal-body">
+                <div class="skill_buy">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Skill Name</th>
+                                <th>Build Cost</th>
+                                <th width="25%"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn" onclick="$(this).parents('.modal').modal('hide');">Done</button></div>
+</script>
+
+<script id="skill-item-template" type="text/html">
+    <td><span class="skill-name" rel="popover" title="<%= skill.name %>" data-content="<%= skill.description %> and stuff"><%= skill.name %></span><br><% if(skill.required_skills.length) { %><span class="small">has skill requirements</span><% } %></td>
+    <td><%= skill.build_cost %></td>
+    <td><button class="btn btn-success buy_skill">Buy</button></td>
+</script>
+
+<script id="faction-list-template" type="text/html">
+    <h4><%= faction.faction.name %></h4>
+    <p><% if(char.is_new) { %>Starting gear: <%= faction.faction.start_gear %><% } %></p>
+</script>
+
+<script id="header-list-template" type="text/html">
+    <h4><%= header.name %></h4>
+    <p>Header Ability: <%= header.ability %></p>
+</script>
+
+<script id="profession-bought-list-template" type="text/html">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Profession Name</th>
+                <th>Score</th>
+                <th>Rank</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="3"></td><td><a data-toggle="modal" data-target="#profession-popup">Buy New Prof.</a></td></tr>
+        </tbody>
+    </table>
+</script>
+
+<script id="profession-bought-template" type="text/html">
+        <td><%= profession.profession.name %></td>
+        <td>
+            <div class="btn-group">
+                <button class="btn <% if(profession.score > profession.orig_score) { %>decrease btn-danger<% } %>">-</button>
+                <span class="to_buy btn"><%= profession.score %></span>
+                <button class="btn <% if( (char.free_build >= next_cost) && (profession.score < 25) ){ %>increase btn-success<% } %>">+</button>
+            </div>
+        </td>
+        <td><%= Math.ceil(profession.score/10) %></td>
+        <td class="removable"><div>{% if user.is_staff or user.is_superuser %}<button class="btn refund btn-danger">Refund</button>{% else %}<% if(profession.removable) { %><button class="btn refund">removable</button><% } %>{% endif %}</div></td>
+</script>
+
+<script id="profession-list-template" type="text/html">
+            <div class="modal-header">
+
+                <h3>Add new professions 
+                    <span class="free_build for_profession_buy"> Free build: <span class="free-build-total"><%= char.free_build %></span></span>
+                </h3>
+            </div>
+            <div class="modal-body">
+                <div class="profession_buy">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Profession Name</th>
+                                <th width="25%"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn" onclick="$(this).parents('.modal').modal('hide');">Done</button></div>
+</script>
+
+<script id="profession-item-template" type="text/html">
+    <td><span class="profession-name" rel="popover" title="<%= profession.name %>" data-content="<%= profession.description %> and stuff"><%= profession.name %></span></td>
+    <td><button class="btn btn-success buy_profession">Buy</button></td>
+</script>
+
+
+{% endblock %}

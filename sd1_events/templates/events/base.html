@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block extra-body-js %}
+<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+<script type="text/javascript">
+
+    Stripe.setPublishableKey('{{ STRIPE_PUBLIC }}');   
+
+</script>
+{% endblock %}

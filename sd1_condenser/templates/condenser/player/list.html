@@ -1,0 +1,164 @@
+{% extends 'condenser/base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}Player list{% endblock %}
+
+{% block contents %}
+
+<div class="span12">
+	<input type="checkbox" value='X' id="filter_unapproved"> Show only unappoved backgrounds
+<br><br>
+	<table class="table-striped table" id="player-list">
+		<thead>
+			<tr>
+				<th>Display Name</th>
+				<th>Email</th>
+				<th>XP</th>
+				<th>Current Char</th>
+				<th>Build</th>
+				<th>BG</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for player in players %}
+			<tr>
+				<td>{{ player.get_profile.display_name }}</td>
+				<td>{{ player.email }}</td>
+				<td>{{ player.eepsbank.eeps }}
+				{% with player.personalprofile.get_current_char as char %}
+				<td>{% if not player.is_staff and not player.is_superuser %}
+						{% if char.slug %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a> 
+						{% if player.personalprofile.get_prev_char.count %}
+						<span class="dropdown"  id="{{ player.username }}-chars"><a data-target="#{{ player.username }}-chars" class="dropdown-toggle" data-toggle="dropdown" href="#">
+						    <span class="caret"></span>
+						  </a>
+						  <ul class="dropdown-menu">
+						    {% for char in player.personalprofile.get_prev_char %}
+						    	{% if char.is_deceased or char.is_retired %}
+							    	<li><a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a></li>
+						    	{% endif %}
+						    {% endfor %}
+						  </ul></span>
+					  {% endif %}
+					  {% else %}{{char}}{% endif %}
+				{% else %}Staff{% endif %}
+
+				</td>
+				<td>{% if not player.is_staff and not player.is_superuser %}{{ char.build_spent }}{% endif %}</td>
+				<td>{% if not player.is_staff and not player.is_superuser %}
+					{% if char.background and not char.background_approved %}X{% endif %}
+
+				{% endif %}</td>
+
+				{% endwith %}
+				<td class="dropdown">
+					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_grant_eeps' slug=player.username %}" class="give-xp-dialog">Give XP</a></li>{% endif %}
+                        
+                    </ul>
+                </td>
+
+			</tr>
+		{% endfor %}
+		</tbody>
+
+	</table>
+
+</div>
+
+<div id="eeps-popup" class="modal fade hide">
+	<div class="modal-header">
+		<a class="close" data-dismiss="modal">×</a>
+		<h3>Modal header</h3>
+	</div>
+	<div class="modal-body">
+		<form id="give-eeps-form" class="form-horizontal" method="POST" action="">
+			<fieldset>
+			<h3>EEPS for <span class="player-name"></span></h3>
+			<div class="control-group eeps-group">
+				<label class="control-label">Eeps</label>
+				<div class="controls">
+					<input type="text" name="eeps" id="eeps-input">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">Reason</label>
+				<div class="controls">
+					<textarea name="reason" id="reason-input"></textarea>
+				</div>
+			</div>
+			{% csrf_token %}
+			</fieldset>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn btn-primary save">Save</a>
+		<a href="#" class="btn save stay">Save and add more</a>
+		<a href="#" class="btn">Cancel</a>
+	</div>
+
+</div>
+
+
+{% endblock %}
+
+{% block extra-js %}
+
+	var oTable = $('#player-list').dataTable({ 
+		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sPaginationType": "bootstrap",
+		"bStateSave": true
+	});
+
+	$('#filter_unapproved').change( function () {
+			if( $(this).attr('checked') ) {
+	            oTable.fnFilter( $(this).val(), 5 );
+	            } else {
+	            	oTable.fnFilter( '', 5 );
+	            }
+    } );
+
+    $('#player-list').on('click', '.give-xp-dialog', function(e) {
+    	$('#eeps-popup').find('.control-group').removeClass('error');
+    	$('#give-eeps-form').attr('action', $(e.target).attr('data-action'));
+    	$('#give-eeps-form').find('.player-name').html($(e.target).attr('data-name'));
+    	$('#eeps-popup .btn').removeAttr('disabled');
+    	$('#eeps-popup').modal('show');
+    });
+
+    $('#eeps-popup').on('click', '.save', function(e) {
+	    
+
+	    
+    	form = $('#give-eeps-form')
+    	
+    	if(form.find('#eeps-input').val() != parseInt(form.find('#eeps-input').val())){
+    		form.find('.eeps-group').addClass('error');
+    		return false;
+    	}
+
+    	data = form.serialize();
+
+    	$('#eeps-popup .btn').attr('disabled','disabled');
+    	$.ajax(form.attr('action'),{
+                type: 'POST',
+                data: data,
+                success: function() {
+                	form.find('#eeps-input').val(0);
+                	form.find('#reason-input').val('');
+                    if($(e.target).hasClass('stay')) {
+                    	$('#eeps-popup .btn').removeAttr('disabled');
+                    } else {
+
+                    	$('#eeps-popup').modal('hide');
+                    }
+                }
+            });
+    });
+
+{% endblock %}
+

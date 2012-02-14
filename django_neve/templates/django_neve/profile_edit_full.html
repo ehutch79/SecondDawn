@@ -1,0 +1,42 @@
+{% extends 'django_neve/base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block contents %}
+    <div class="span8">
+        {% with current="edit" %}
+        {% include 'django_neve/tabs.html' %}
+        {% endwith %}
+
+        <div id="tab-contents">
+            {% include 'django_neve/profile_edit.html' %}
+        </div>
+    
+    </div>
+
+    <div class="span4 left-space-holder ver2">
+        &nbsp;
+    </div>
+
+{% endblock contents %}
+
+{% block extra-js %}
+    $('.nav-tabs').bind('shown', function (e) {
+        target = $(e.target);
+        target.siblings().removeClass('active');
+        target.addClass('active');
+        
+        $.ajax(target.attr('data-url'),{
+            cache: false,
+            method: 'GET',
+            beforeSend: function( xhr ) {
+                $('#tab-contents').html('<div style="text-align: center;"><img src="{{ STATIC_URL }}img/loading.gif"><br>Loading…</div>');
+            }
+        }).always(function(data) { 
+            $('#tab-contents').html(data);
+        });
+    })
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'django_neve/base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}Create Character{% endblock %}
+
+{% block contents %}
+    <div class="span8">
+        {% include 'condenser/char_create.html' %}    
+    </div>
+
+    <div class="span4 left-space-holder ver2">
+        &nbsp;
+    </div>
+
+{% endblock contents %}
+
+{% block extra-js %}
+{% endblock %}

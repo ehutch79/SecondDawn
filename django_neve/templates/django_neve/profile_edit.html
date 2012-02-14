@@ -1,0 +1,25 @@
+{% load url from future %}
+{% load bootstrap %}
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert-message {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <a class="close" href="#">×</a>
+                        <p><strong>{{ message }}</strong></p>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <form method="post" action="">
+        <fieldset>
+        <legend>Account Info</legend>
+            {{ form|bootstrap }}
+            {% csrf_token %}
+        </fieldset>
+        <div class="actions">
+            <input type="submit" class="btn primary" value="Save">
+        </div>
+
+        </form>

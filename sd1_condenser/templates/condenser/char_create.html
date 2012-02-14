@@ -1,0 +1,28 @@
+{% load url from future %}{% load bootstrap %}
+        <form method="post" action="" class="form-horizontal">
+            <fieldset>
+            <legend>Create New Charector</legend>
+                {{ form|bootstrap }}
+                {% csrf_token %}
+            </fieldset>
+            <div class="form-actions">
+                <input type="submit" class="btn primary" value="Create">
+            </div>
+
+        </form>
+        
+        {% if user.character_set.all.count %}
+        <div>Looking for your previous character? These are the ones on file for you;<br><br></div>
+        <table>
+            <tr>
+                <th width="75%">Name</th>
+                <th>Build Spent</th>
+            </tr>
+        {% for char in user.character_set.all %}
+            <tr>
+                <td><a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char.name }}</a></td>
+                <td>{{char.build_spent }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        {% endif %}

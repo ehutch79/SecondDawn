@@ -1,0 +1,26 @@
+{% extends 'django_neve/base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}Register{% endblock %}
+
+{% block contents %}
+    <div class="span4 left-space-holder ver2">
+        &nbsp;
+    </div>
+
+    <div class="span8">
+        <form method="post" class="form-horizontal" action="{% url 'django_neve_register' %}">
+        <fieldset>
+        <legend>Create a new user account</legend>
+        {{ form|bootstrap }}
+        {% csrf_token %}
+        </fieldset>
+        <div class="form-actions">
+            <input type="submit" class="btn primary" value="Register">
+        </div>
+
+        </form>
+    </div>
+{% endblock contents %}

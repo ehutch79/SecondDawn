@@ -1,0 +1,6 @@
+{% load url from future %}
+        <ul class="nav nav-tabs" data-tabs="tabs">
+            <li data-toggle="tab" {% if current == "edit" %}class="active"{% endif %}><a href="#edit" data-url="{% url 'django_neve_profile_edit' slug=user.get_profile.slug %}">Edit Profile</a></li>
+            <li data-toggle="tab" {% if current == "messages" %}class="active"{% endif %}><a href="#contact">Contact Info</a></li>
+            <li data-toggle="tab" {% if current == "allergies" %}class="active"{% endif %}><a href="#allergies" data-url="{% url 'django_neve_profile_edit' slug=user.get_profile.slug %}">Allergies / Medical</a></li>
+        </ul>

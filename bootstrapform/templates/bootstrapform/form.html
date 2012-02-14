@@ -1,0 +1,50 @@
+{% load bootstrap %}
+
+{{ form.non_field_errors }}
+
+{% for field in form.hidden_fields %}
+    {{ field }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+    <div class="control-group{% if field.errors %} error{% endif %}">
+        {% if field|is_checkbox %}
+            <ul class="inputs-list">
+                <li>
+                    <div class="controls">
+                        <label class="control-label {% if field.field.required %} required{% endif %}">
+                            {{ field }} <span>{{ field.label }}</span>
+                        </label>
+
+                        {% for error in field.errors %}
+                            <div class="help-inline">{{ error }}</div>
+                        {% endfor %}
+
+                        {% if field.help_text %}
+                        <div class="help-block">
+                            {{ field.help_text }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        {% else %}
+            <label for="id_{{ field.name }}" class="control-label {% if field.field.required %} required{% endif %}">{{ field.label }}</label>
+            <div class="controls">
+                {{ field }}
+
+                {% for error in field.errors %}
+                    <div class="help-inline">{{ error }}</div>
+                {% endfor %}
+
+                {% if field.help_text %}
+                <div class="help-block">
+                    {{ field.help_text }}
+                </div>
+                {% endif %}
+
+            </div>
+        {% endif %}
+    </div>
+{% endfor %}
+

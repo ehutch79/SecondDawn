@@ -1,0 +1,32 @@
+{% extends 'events/base.html' %}
+{% load url from future %}
+
+{% block contents %}
+
+<div class="span4">poop</div>
+
+<div class="span8">
+<h2>Thanks for registering!</h2>
+{% if not receipt.problem %}
+<h3>You're now registered for:</h3>
+<p>
+<ul>
+    {% for reg in receipt.regs.all %}
+    <li>{{ reg.event }} - {{ reg.option }} (${{ reg.due }})</li>
+    {% endfor %}
+</ul>
+</p>
+<p>Make sure you fill out your personal profile. This way we know about any special considerations you may need. Such as dietary restrictions, etc.</p>
+
+{% else %}
+
+<h3>Unfortunently there was an issue processing your payment.</h3>
+<p>Our credit card processor reported this error: {{ receipt.problem }}</p>
+
+<p> Contact staff at <a href="mailto:seconddawnlarp@gmail.com">seconddawnlarp@gmail.com</a> to resolve the issue</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

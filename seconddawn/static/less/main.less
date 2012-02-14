@@ -1,0 +1,188 @@
+@import "bootstrap.less";
+
+@font-face {
+    font-family: 'SecondDawnLogoType';
+    src: url('dirty_ego/dirtyego-webfont.eot');
+    src: url('dirty_ego/dirtyego-webfont.eot?#iefix') format('embedded-opentype'),
+         url('dirty_ego/dirtyego-webfont.woff') format('woff'),
+         url('dirty_ego/dirtyego-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+body {
+
+}
+
+label.required {
+    font-weight: bold;
+}
+
+.dropdown-menu {
+    max-width: 600px;
+    //width: 600px;
+    
+    input {
+        margin: 3px 15px;
+    }
+    
+    .ctrlHolder {
+        text-align: right;
+        margin-right: 0px;
+        input { margin-right: 0px; }
+    }
+}
+.pull-right .dropdown-menu {
+    left: auto;
+    right: 0;
+
+}
+.dropdown-menu #top-login-form li.form-label > a:hover {
+    background: transparent;
+    color: @gray;
+}
+
+
+.navbar h3 a, .navbar .brand {
+    font-family: SecondDawnLogoType, Helvetica, sans-serif;
+    font-size: 30px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    letter-spacing: 1px;
+}
+
+#main {
+    padding-top: 48px;
+}
+
+.left-space-holder {
+    background-image: url(http://placekitten.com/460/300);
+    display: inline-block;
+    .border-radius(3px);
+    .box-shadow(inset 0px 0px 10px rgba(0,0,0,0.8));
+    height: 300px;
+    &.ver2 {
+        height: 450px;
+        background-image: url(http://placekitten.com/460/450);    
+    }
+}
+
+
+.char { position: relative; }
+.char_name { display: inline-block; 
+    .label {
+        vertical-align: middle;
+    }
+}
+
+.char_actions {
+    text-align: right;
+    padding-top: 6px;
+}
+
+.char_attr {
+    font-size: 16px;
+    .attr_value { text-align: right; font-size: 16px; }
+    .attr_buy { 
+        display: none;
+    }
+    .total_box { padding-top: 15px; }
+}
+
+tr .btn { margin-top: -4px; }
+
+
+.editable .char_attr {
+    .attr_value { display: none;}
+    .attr_buy { display: table-cell; > div {float: right;}}
+}
+
+#background-input {
+    box-sizing: border-box;
+    min-height: 10em;
+    width: 100%;
+}
+
+.skill-block table {
+    width: 100%;
+    th {
+        text-align: left;
+    }
+}
+
+.free_build.for_skill_buy, .free_build.for_profession_buy { font-size: 13px; position: absolute; right: 48px;}
+
+.skill_buy, .profession_buy {
+    height: 350px;
+    overflow-y: scroll;
+
+    .available .skill-info,.available .skill-cost {
+        padding-top: 14px;
+    }
+    
+    .missing-req {
+        color: rgb(255, 150, 150);
+    }
+    
+    .taken {
+        color: @gray;
+    }
+
+    td.removable > div { float: right; }
+}
+
+footer {
+    color: @grayLight;
+    font-size: 10px;
+    margin-top: 24px;
+
+}
+
+div.dataTables_length label {
+    float: left;
+    text-align: left;
+}
+
+div.dataTables_length select {
+    width: 75px;
+}
+
+div.dataTables_filter label {
+    float: right;
+}
+
+div.dataTables_info {
+    padding-top: 8px;
+}
+
+div.dataTables_paginate {
+    float: right;
+    margin: 0;
+}
+
+table.table {
+    clear: both;
+    margin-bottom: 6px !important;
+}
+
+table.table thead .sorting,
+table.table thead .sorting_asc,
+table.table thead .sorting_desc,
+table.table thead .sorting_asc_disabled,
+table.table thead .sorting_desc_disabled {
+    cursor: pointer;
+    *cursor: hand;
+}
+
+table.table thead .sorting { background: url('../img/datatables/sort_both.png') no-repeat center right; }
+table.table thead .sorting_asc { background: url('../img/datatables/sort_asc.png') no-repeat center right; }
+table.table thead .sorting_desc { background: url('../img/datatables/sort_desc.png') no-repeat center right; }
+
+table.table thead .sorting_asc_disabled { background: url('../img/datatables/sort_asc_disabled.png') no-repeat center right; }
+table.table thead .sorting_desc_disabled { background: url('../img/datatables/sort_desc_disabled.png') no-repeat center right; }
+
+table.dataTable th:active {
+    outline: none;
+}

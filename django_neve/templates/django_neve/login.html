@@ -1,0 +1,24 @@
+{% extends 'django_neve/base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block title %}Login{% endblock %}
+
+{% block contents %}
+    <div class="span6 left-space-holder">
+        &nbsp;
+    </div>
+    <div class="span6">
+        <form method="POST" action="{% url 'django_neve_login' %}">
+        <fieldset>
+        <legend>Login</legend>
+        {{ form|bootstrap }}
+        {% csrf_token %}
+        </fieldset>
+        <div class="actions">
+            <input type="submit" class="btn primary" value="Login"> or <a href="{% url 'django_neve_register' %}">Register</a>.<br><br>Perhaps you <a href="">Forgot your password</a>
+        </div>
+        </form>
+    </div>
+{% endblock contents %}
