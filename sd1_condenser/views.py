@@ -17,6 +17,8 @@ from django.db.models import F, Q
 from sd1_condenser.models import *
 from sd1_condenser.forms import CreateCharacterForm
 
+from sd1_events.models import EventInfo
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -295,7 +297,7 @@ def char_delete(request, slug):
     if request.user != char.user or not char.is_new:
         return HttpResponseForbidden('You may only delete your own new characters')
 
-    build_events = bga_events.filter(build_blackout_start__lte=now, event_end__gte=now)
+    build_events = EventInfo.objects.filter(build_blackout_start__lte=now, event_end__gte=now)
     if build_events.count() > 0:
         return HttpResponseForbidden('You may not delete a character during a build blackout')
 
@@ -316,4 +318,49 @@ def char_approve_bg(request, slug):
         return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
     else:
         return HttpResponseRedirect('/')
+
+
+@login_required
+def char_approve_bg(request, slug):
+    chars = Character.objects.filter(slug=slug)
+    char = get_object_or_404(Character, slug=slug)
+
+    if request.method != 'POST':
+        return HttpResponseForbidden('method not allowed')
+
+    if request.user != char.user and not request.user.is_superuser:
+        return HttpResponseForbidden('You may only buy build on your own character')
     
+    build_events = EventInfo.objects.filter(build_blackout_start__lte=now, event_end__gte=now)
+    if build_events.count() > 0:
+        return HttpResponseForbidden('You may not buy build during a build blackout')
+
+    if not char.can_buy_build:
+        return HttpResponseForbidden('You have already bought build for this character')
+
+    to_buy = request.POST.get('build_to_buy', 0)
+    if to_buy > 12:
+        to_buy = 12
+    temp = to_buy
+    cost = 0
+    if temp < 9:
+        cost = temp * 100
+    else:
+        cost = 800
+        temp -= 8
+        add_cost = 100
+        while temp:
+            add_cost += 100
+            temp -= 1
+            cost += add_cost
+
+
+    if cost <= char.user.eepsbank.eeps:
+        eeps = char.user.eepsbank
+        chars.update(can_buy_build=False)
+        chars.update(free_build=F('free_build')+to_buy)
+        eeps -= cost
+        eeps.save()
+        
+    return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
+
