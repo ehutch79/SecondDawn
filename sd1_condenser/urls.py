@@ -22,7 +22,11 @@ urlpatterns = patterns('',
     url(r'^char/create/$', 'sd1_condenser.views.character_create', name='condenser_char_create'),
 
     url(r'^char/view/(?P<slug>[-\w\d]+)/attr/$', 'sd1_condenser.views.character_adjust_attributes', name='condenser_char_attr_adjust'),
+    url(r'^char/view/(?P<slug>[-\w\d]+)/approve_bg/$', 'sd1_condenser.views.char_approve_bg', name='condenser_char_approve_bg'),
     url(r'^char/view/(?P<slug>[-\w\d]+)/$', 'sd1_condenser.views.character_view', name='condenser_char_view'),
+
+    url(r'^char/delete/(?P<slug>[-\w\d]+)/$', 'sd1_condenser.views.char_delete', name='condenser_char_delete'),
+
 
     url(r'^char/api/', include(v1_api.urls)),
     url(r'^$', 'sd1_condenser.views.character_view', name='condenser_char_home'),

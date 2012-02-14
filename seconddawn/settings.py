@@ -117,6 +117,7 @@ TEMPLATE_DIRS = (
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django_neve.context_processors.site',
     'sd1_events.context_processors.stripe',
+    'sd1_condenser.context_processors.in_blackout',
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",

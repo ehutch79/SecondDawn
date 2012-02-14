@@ -159,7 +159,7 @@ class Character(models.Model):
 
     is_new = models.BooleanField(default=True)
 
-    can_spend_eeps = models.BooleanField(default=True)
+    can_buy_build = models.BooleanField(default=True)
 
     name = models.CharField(max_length=255)
 
@@ -175,7 +175,6 @@ class Character(models.Model):
     background_approved = models.BooleanField(default=False)
 
     feats = models.ManyToManyField(Feat, blank=True, null=True)
-
 
     def __unicode__(self):
         return self.name

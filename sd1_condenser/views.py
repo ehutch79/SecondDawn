@@ -1,4 +1,5 @@
 import math
+import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.views.decorators.cache import never_cache
@@ -285,3 +286,34 @@ def player_grant_eeps(request, slug):
     return HttpResponse('saved')
 
 
+@login_required
+def char_delete(request, slug):
+    char = get_object_or_404(Character, slug=slug)
+
+    now = datetime.datetime.now()
+
+    if request.user != char.user or not char.is_new:
+        return HttpResponseForbidden('You may only delete your own new characters')
+
+    build_events = bga_events.filter(build_blackout_start__lte=now, event_end__gte=now)
+    if build_events.count() > 0:
+        return HttpResponseForbidden('You may not delete a character during a build blackout')
+
+    char.delete()
+
+    return HttpResponseRedirect(reverse('condenser_char_create'))
+
+@login_required
+def char_approve_bg(request, slug):
+    chars = Character.objects.filter(slug=slug)
+
+    if not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden('only staff may approve backgrounds')
+
+    chars.update(background_approved=True)
+    chars.update(free_build=F('free_build')+5)
+    if chars.count() > 0:
+        return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
+    else:
+        return HttpResponseRedirect('/')
+    

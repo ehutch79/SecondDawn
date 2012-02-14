@@ -98,6 +98,12 @@
     </div></header>
     
     <div id="main" role="main" class="container">
+        {% if in_bga_blackout %}
+            <div class="alert alert-notice">No more BGAs will be accepted until the end of the next event</div>
+        {% endif %}
+        {% if in_build_blackout %}
+            <div class="alert alert-notice">No more build can be spent until the end of the next event</div>
+        {% endif %}
         <div class="row" id="contents">
         {% block contents %}<!--
             <div id="myCarousel" class="carousel slide span8">

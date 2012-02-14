@@ -744,7 +744,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/libs/backbone-tastypie-20120102.js"></script>
 
 <script id="char-template" type="text/html">
-    <div class="span6">
+    <div class="span6 {% if not in_build_blackout and not char.is_retired and not char.is_deceased%}editable{% endif %}">
         <div class="row">
             <h2 class="char_name span4"><%= name %>
                 <% if(is_new) { %><span class="label label-success">new</span><% } %>
@@ -757,8 +757,13 @@
                     <button class="btn save-char">Save</button>
                     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a>Exchange XP for build</a></li>
-                        <li><a>Retire Character</a></li>
+                        {% if char.can_buy_build and not in_build_blackout %}<li><a>Exchange XP for build</a></li>{% endif %}
+                        {% if user.is_superuser %}
+                            {% if not char.background_approved %}<li><a href="{% url 'condenser_char_approve_bg' slug=char.slug %}">Approve Background</a></li>{% endif %}
+                            <li><a>Retire Character</a></li>
+                            <li><a>Kill Character</a></li>
+                        {% endif %}
+                        {% if char.is_new and char.user == user and not in_build_blackout %}<li><a href="{% url 'condenser_char_delete' slug=char.slug %}">Delete Character</a></li>{% endif %}
                     </ul>
                 </span>
             </div>
@@ -772,7 +777,7 @@
 
     </div>
 
-    <div class="span6">
+    <div class="span6 {% if not in_build_blackout and not char.is_retired and not char.is_deceased%}editable{% endif %}">
         <div class="build-block"></div>        
         
         <div class="faction-block">
@@ -791,7 +796,6 @@
         <div class="background-block">
             <% if(!background_approved) { 
                 %><textarea name="background" id="background-input"><%= background %></textarea>
-                {% if user.is_superuser %}<input type="checkbox" value="true" name="background_approved" id="background-approved"> Approve Background {% endif %}
             <% } else { %>
                 <%= background %>
 
