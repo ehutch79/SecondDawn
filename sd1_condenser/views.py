@@ -321,7 +321,7 @@ def char_approve_bg(request, slug):
 
 
 @login_required
-def char_approve_bg(request, slug):
+def char_buy_build(request, slug):
     chars = Character.objects.filter(slug=slug)
     char = get_object_or_404(Character, slug=slug)
 
@@ -361,6 +361,6 @@ def char_approve_bg(request, slug):
         chars.update(free_build=F('free_build')+to_buy)
         eeps -= cost
         eeps.save()
-        
+
     return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
 
