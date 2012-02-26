@@ -161,13 +161,14 @@
   <script defer src="{{ STATIC_URL }}js/libs/jquery.dataTables.1.9.0.min.js"></script>
   <script defer src="{{ STATIC_URL }}js/libs/jquery.dataTables.bootstrap.js"></script>
 <script type="text/javascript">
-
+$(function() {
  $.extend( $.fn.dataTableExt.oStdClasses, {
     "sWrapper": "dataTables_wrapper form-inline",
     "sSortAsc": "header headerSortDown",
     "sSortDesc": "header headerSortUp",
     "sSortable": "header"
-} );
+  }); 
+});
 </script>
   
   {% block extra-body-js %}{% endblock %}
