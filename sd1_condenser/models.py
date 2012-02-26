@@ -140,6 +140,12 @@ class Feat(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', overwrite=True)
 
+    requires_info = models.BooleanField(default=False)
+    cost = models.IntegerField(default=0)
+    incr_cost = models.IntegerField(default=0)
+
+    description = models.TextField()
+
     def __unicode__(self):
         return self.name
 
@@ -173,8 +179,6 @@ class Character(models.Model):
 
     background = models.TextField(blank=True, null=True)
     background_approved = models.BooleanField(default=False)
-
-    feats = models.ManyToManyField(Feat, blank=True, null=True)
 
     def __unicode__(self):
         return self.name
@@ -236,6 +240,28 @@ class SkillBought(models.Model):
 
     def __unicode__(self):
         return self.skill.name
+
+class FeatBought(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    
+    char = models.ForeignKey(Character, db_index=True, related_name="feats")
+    feat = models.ForeignKey(Feat, db_index=True, related_name="bought_by")
+    
+    info = models.CharField(max_length=255)
+
+    paid_total = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Feat Bought"
+        verbose_name_plural = "Feats Bought"
+
+    def __unicode__(self):
+        if self.info:
+            return "{feat} ({info})".format(feat=self.feat.name, info=self.info)
+
+        return self.feat.name
+
+
 
 class FactionStatus(models.Model):
     id = UUIDField(version=4, primary_key=True)

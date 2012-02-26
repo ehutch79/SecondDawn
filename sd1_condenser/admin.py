@@ -12,13 +12,18 @@ class CharSkills(admin.TabularInline):
     readonly_fields = ['bundled_from',]
     extra = 0
 
+class CharFeats(admin.TabularInline):
+    model = FeatBought
+    fk_name = "char"
+    extra = 0
+
 class ProfBoughtStatus(admin.TabularInline):
     model = ProfessionBought
     fk_name = "char"
     extra = 0
 
 class CharacterAdmin(admin.ModelAdmin):
-    inlines = [CharFactionStatus, CharSkills, ProfBoughtStatus ]
+    inlines = [CharFactionStatus, CharSkills, ProfBoughtStatus, CharFeats, ]
     list_display = ('name', 'is_new', 'is_npc', 'is_deceased', 'is_retired', 'background_approved')
     list_filter = ('is_new', 'is_npc', 'is_deceased', 'is_retired', 'background_approved')
     search_fields = ['user__email', 'name', ]
@@ -36,6 +41,11 @@ admin.site.register(Faction, FactionAdmin)
 class ProfessionAdmin(admin.ModelAdmin):
     pass
 admin.site.register(Profession, ProfessionAdmin)
+
+class FeatAdmin(admin.ModelAdmin):
+    pass
+admin.site.register(Feat, FeatAdmin)
+
 
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name', 'build_cost', 'activation')

@@ -3,7 +3,7 @@ from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.exceptions import NotFound
 
-from sd1_condenser.models import Character, Skill, Profession, Header, Faction, FactionStatus, SkillBought, ProfessionBought
+from sd1_condenser.models import Character, Skill, Profession, Header, Faction, Feat, FactionStatus, SkillBought, FeatBought, ProfessionBought
 
 class UserResource(ModelResource):
     class Meta:
@@ -17,6 +17,7 @@ class CharacterResource(ModelResource):
     professions = fields.ToManyField('sd1_condenser.api.ProfessionBoughtResource', 'professions', full=True)
     headers = fields.ToManyField('sd1_condenser.api.HeaderResource', 'headers', full=True)
     factions = fields.ToManyField('sd1_condenser.api.FactionStatusResource', lambda bundle: FactionStatus.objects.filter(char=bundle.obj, member=True), full=True)
+    feats = fields.ToManyField('sd1_condenser.api.FeatBoughtResource', 'feats', full=True)
 
     def obj_get_list(self, request=None, **kwargs):
         obj_list = super(CharacterResource, self).obj_get_list(request, **kwargs)
@@ -65,8 +66,6 @@ class ProfessionBoughtResource(ModelResource):
         queryset = ProfessionBought.objects.all()
         resource_name = 'professionbought'
 
-
-
 class SkillBoughtResource(ModelResource):
     skill = fields.ToOneField(SkillResource, 'skill', full=True)
     bundled_from = fields.ToOneField(SkillResource, 'bundled_from', full=True, blank=True, null=True)
@@ -75,6 +74,23 @@ class SkillBoughtResource(ModelResource):
         queryset = SkillBought.objects.all()
         resource_name = 'skillbought'
 
+
+class FeatResource(ModelResource):
+    
+    class Meta:
+        queryset = Feat.objects.all()
+        resource_name = 'feat'
+        limit = 0
+        ordering = ['name']
+
+
+class FeatBoughtResource(ModelResource):
+    feat = fields.ToOneField(FeatResource, 'feat', full=True)
+    paid_total = fields.IntegerField(readonly=True, attribute='paid_total')
+
+    class Meta:
+        queryset = FeatBought.objects.all()
+        resource_name = 'featbought'
 
 class HeaderResource(ModelResource):
 

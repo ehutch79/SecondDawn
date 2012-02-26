@@ -850,6 +850,7 @@
                     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         {% if char.can_buy_build and not in_build_blackout %}<li><a data-toggle="modal" data-target="#eeps-popup">Exchange XP for build</a></li>{% endif %}
+                        {% if not in_build_blackout %}<li><a data-toggle="modal" data-target="#feats-popup">Buy Feats</a></li>{% endif %}
                         {% if user.is_superuser %}
                             {% if not char.background_approved %}<li><a href="{% url 'condenser_char_approve_bg' slug=char.slug %}">Approve Background</a></li>{% endif %}
                             <li><a>Retire Character</a></li>
@@ -866,6 +867,11 @@
 
         <h3>Skills:</h3>
         <div class="skill-block"></div>
+
+        <% if(feats.length) { %>
+            <h3>Feats:</h3>
+            <div class="feats-block"></div>
+        <% } %>
 
     </div>
 
@@ -903,6 +909,7 @@
     <div id="skills-popup" class="modal fade hide"></div>
     <div id="profession-popup" class="modal fade hide"></div>
     <div id="eeps-popup" class="modal fade hide"></div>
+    <div id="feats-popup" class="modal fade hide"></div>
 
 </script>
 
@@ -1134,5 +1141,56 @@
     <td><button class="btn btn-success buy_profession">Buy</button></td>
 </script>
 
+
+<script id="feat-bought-list-template" type="text/html">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Feat Name</th>
+                <th>Activation Cost</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="2"></td><td><a data-toggle="modal" data-target="#feats-popup">Add New feat</a></td></tr>
+        </tbody>
+    </table>
+</script>
+<script id="feat-bought-template" type="text/html">
+        <td><%= feat.feat.name %></td>
+        <td><%= feat.feat.activation %></td>
+        <td class="removable"><div>{% if user.is_staff or user.is_superuser %}<% if(!feat.bundled_from) { %><button class="btn refund btn-danger">Refund</button><% } %>{% endif %}</div></td>
+</script>
+
+<script id="feat-list-template" type="text/html">
+            <div class="modal-header">
+                <h3>Add new feats 
+                    <span class="free_build for_feat_buy"> Free build: <span class="free-build-total"><%= char.free_build %></span></span>
+                </h3>
+            </div>
+            <div class="modal-body">
+                <div class="feat_buy">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>feat Name</th>
+                                <th>Build Cost</th>
+                                <th width="25%"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn" onclick="$(this).parents('.modal').modal('hide');">Done</button></div>
+</script>
+
+<script id="feat-item-template" type="text/html">
+    <td><span class="feat-name" rel="popover" title="<%= feat.name %>" data-content="<%= feat.description %> and stuff"><%= feat.name %></span><br><% if(feat.required_feats.length) { %><span class="small">has feat requirements</span><% } %></td>
+    <td><%= feat.build_cost %></td>
+    <td><button class="btn btn-success buy_feat">Buy</button></td>
+</script>
 
 {% endblock %}
