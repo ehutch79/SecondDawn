@@ -283,8 +283,9 @@ def player_grant_eeps(request, slug):
     eeps_record.eeps = eeps
     eeps_record.reason = reason
     eeps_record.save()
+    player = User.objects.get(pk=player.pk)
 
-    return HttpResponse('saved')
+    return HttpResponse(json.dumps({'eeps': player.eepsbank.eeps, 'pk': player.pk }), mimetype="application/json")
 
 
 @login_required

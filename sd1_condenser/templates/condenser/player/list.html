@@ -24,10 +24,10 @@
 		</thead>
 		<tbody>
 		{% for player in players %}
-			<tr>
+			<tr id="{{ player.pk }}">
 				<td>{{ player.get_profile.display_name }}</td>
 				<td>{{ player.email }}</td>
-				<td>{{ player.eepsbank.eeps }}
+				<td class="eeps">{{ player.eepsbank.eeps }}
 				{% with player.personalprofile.get_current_char as char %}
 				<td>{% if not player.is_staff and not player.is_superuser %}
 						{% if char.slug %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a> 
@@ -147,7 +147,8 @@
     	$.ajax(form.attr('action'),{
                 type: 'POST',
                 data: data,
-                success: function() {
+                dataType: 'json',
+                success: function(data) {
                 	form.find('#eeps-input').val(0);
                 	form.find('#reason-input').val('');
                     if($(e.target).hasClass('stay')) {
@@ -156,6 +157,7 @@
 
                     	$('#eeps-popup').modal('hide');
                     }
+                    $('#'+data.pk).find('.eeps').html(data.eeps)
                 }
             });
     });
