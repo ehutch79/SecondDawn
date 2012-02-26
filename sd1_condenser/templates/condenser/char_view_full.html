@@ -624,7 +624,96 @@
             }
         }
     });
+    
+    var BuyBuildView = Backbone.View.extend({
+        to_buy: 0,
 
+        events: { 
+            'click .btn.increase': 'raise',
+            'click .btn.decrease': 'lower',
+            'click #buy_build_with_eeps': 'submit'
+        },    
+
+        initialize: function() {
+            _.bindAll(this, 'render', 'lower', 'raise', 'submit' );
+            
+            this.template = _.template($('#eeps-popup-template').html());
+            this.model.bind('change', this.render);
+
+        },
+
+        render: function() {
+            this.$el.empty();
+            this.$el.html(this.template({char: this.model.attributes, 
+                                            to_buy: this.to_buy,
+                                            next_cost: this.get_cost(this.to_buy+1),
+                                            avail_eeps: {{ char.user.eepsbank.eeps }} - this.get_total_cost(this.to_buy),
+                                            total_cost: this.get_total_cost(this.to_buy)
+
+                                        }));
+            return this;
+        },
+
+        get_cost: function(new_total) {
+            if (new_total < 9) { 
+                return 100;
+            }
+            total = new_total - 8;
+            return (total * 100) + 100;
+        },
+        get_total_cost: function(total) {
+            if (total < 9) {
+                return total * 100;
+            }
+            cost = 800;
+            total = total - 8;
+            next_cost = 200;
+            for (total;total>0;total--) {
+                cost += next_cost;
+                next_cost += 100;
+            }
+            return cost;
+        },
+
+        lower: function(e) {
+            if (this.to_buy <= 0 ) { return false }
+
+            this.to_buy -= 1;
+            this.render();
+            return this
+        },
+
+        raise: function(e) {
+
+            if (this.to_buy >= 12 ) { return false }
+            if ({{ char.user.eepsbank.eeps }} < this.get_total_cost(this.to_buy + 1)) { return false }
+
+            this.to_buy += 1;
+            this.render();
+            return this
+
+        },
+        submit: function() {
+            message = "Are you sure you want to spend " + this.get_total_cost(this.to_buy) + " xp on " + this.to_buy + " build? You can only do this once between events.";
+            if(!confirm(message)) { return false }
+
+            this.$el.find('.btn').attr('disabled','disabled');
+
+            var data = {
+                to_buy: this.to_buy
+            }
+
+            $.ajax('{% url 'condenser_char_buy_build' slug=char.slug %}',{
+                type: 'POST',
+                data: data,
+                success: function() {
+                    char_view.model.dirty = false;
+                    window.location.reload();
+                }
+            });
+
+        }
+    });
 
     var CharView = Backbone.View.extend({
         events: {
@@ -636,7 +725,6 @@
             this.faction_template = _.template($('#faction-list-template').html());
             this.header_template = _.template($('#header-list-template').html());
             this.model = new Char();
-
 
         },
 
@@ -665,6 +753,10 @@
             this.professions_list_view = new ProfessionsView({ model: this.model });
             this.professions_list_view.setElement($(this.$el).find('#profession-popup').first());
             this.professions_list_view.render();
+
+            this.buy_build_view = new BuyBuildView({ model: this.model });
+            this.buy_build_view.setElement($(this.$el).find('#eeps-popup').first());
+            this.buy_build_view.render();
 
 
             _.each(this.model.attributes.factions, function (faction) {
@@ -757,7 +849,7 @@
                     <button class="btn save-char">Save</button>
                     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        {% if char.can_buy_build and not in_build_blackout %}<li><a>Exchange XP for build</a></li>{% endif %}
+                        {% if char.can_buy_build and not in_build_blackout %}<li><a data-toggle="modal" data-target="#eeps-popup">Exchange XP for build</a></li>{% endif %}
                         {% if user.is_superuser %}
                             {% if not char.background_approved %}<li><a href="{% url 'condenser_char_approve_bg' slug=char.slug %}">Approve Background</a></li>{% endif %}
                             <li><a>Retire Character</a></li>
@@ -893,6 +985,33 @@
             <td class="attr_buy"><div><button class="btn reset">Reset All</button></div></td>
         </tr>
 </table>
+</script>
+
+<script id="eeps-popup-template" type="text/html">
+    <div class="modal-header">
+        <h3>Exchange xp for build</h3>
+    </div>
+    <div class="modal-body">
+        {% if char.can_buy_build and not in_build_blackout %}
+        <div><span>Build to buy:</span>
+            <span class="btn-group pull-right">
+                <button class="btn <% if(to_buy > 0) { %>decrease btn-danger<% } %>">-</button>
+                <span class="to_buy btn"><%= to_buy %></span>
+                <button class="btn <% if(next_cost <= avail_eeps) { %>increase btn-success<% } %>">+</button>
+            </span>
+        </div>
+        <div class="clearfix"></div>
+        <br><br>
+        <div>You have {{ char.user.eepsbank.eeps }} xp and buying <%= to_buy %> costs <%= total_cost %> total xp</div>
+        <% if (to_buy < 12) { %><div>To buy <%= to_buy+1 %> build will cost <%= next_cost %> more xp</div><% } %>
+        {% else %}
+        <p> You are unable to buy build at this time. Possibly because you already bought build.</p>
+        {% endif %}
+    </div>
+    <div class="modal-footer">
+        <button class="btn" onclick="$(this).parents('.modal').modal('hide');">Cancel</button>
+        <button class="btn btn-primary" id="buy_build_with_eeps">Buy</button>
+    </div>
 </script>
 
 <script id="skill-bought-list-template" type="text/html">

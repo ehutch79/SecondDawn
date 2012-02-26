@@ -324,6 +324,9 @@ def char_buy_build(request, slug):
     chars = Character.objects.filter(slug=slug)
     char = get_object_or_404(Character, slug=slug)
 
+    now = datetime.datetime.now()
+
+
     if request.method != 'POST':
         return HttpResponseForbidden('method not allowed')
 
@@ -337,7 +340,7 @@ def char_buy_build(request, slug):
     if not char.can_buy_build:
         return HttpResponseForbidden('You have already bought build for this character')
 
-    to_buy = request.POST.get('build_to_buy', 0)
+    to_buy = int(request.POST.get('to_buy', 0))
     if to_buy > 12:
         to_buy = 12
     temp = to_buy
@@ -358,8 +361,12 @@ def char_buy_build(request, slug):
         eeps = char.user.eepsbank
         chars.update(can_buy_build=False)
         chars.update(free_build=F('free_build')+to_buy)
-        eeps -= cost
+        eeps.eeps -= cost
         eeps.save()
 
-    return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
+        return HttpResponse('success buying {to_buy} build for {cost} xp'.format(to_buy=to_buy, cost=cost) )
+    else:
+        return HttpResponseForbidden('Failure buying {to_buy} build for {cost} xp, you only have {eeps} xp'.format(to_buy=to_buy, cost=cost, eeps=char.user.eepsbank.eeps) )
+
+    #return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
 
