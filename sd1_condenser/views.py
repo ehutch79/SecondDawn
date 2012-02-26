@@ -233,8 +233,7 @@ def character_adjust_attributes(request, slug):
         return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': char.slug}))
 
     success = "Your attributes were updated"
-    return render_to_response(template_name, {'char': char, 'attr_success': success},
-                              context_instance=RequestContext(request))
+    return HttpResponse(success)
 
 
 @login_required
