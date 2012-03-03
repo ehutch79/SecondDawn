@@ -83,4 +83,7 @@ def make_profile(sender, **kwargs):
     if not profile.display_name:
         profile.display_name = '{first} {last}'.format(first=user.first_name, last=user.last_name)
 
-    profile.save()
+    try:
+        profile.save()
+    except:
+        pass
