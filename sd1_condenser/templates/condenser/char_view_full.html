@@ -686,8 +686,12 @@
         raise: function(e) {
 
             if (this.to_buy >= 12 ) { return false }
-            if ({{ char.user.eepsbank.eeps }} < this.get_total_cost(this.to_buy + 1)) { return false }
+            {% if not char.user.eepsbank.eeps %}
+                
+            {% endif %}
 
+            if ({{ char.user.eepsbank.eeps }} < this.get_total_cost(this.to_buy + 1)) { return false }
+            
             this.to_buy += 1;
             this.render();
             return this
@@ -844,6 +848,7 @@
                 <% if(is_retired) { %><span class="label label-important">retired</span><% } %>
                 <% if(is_deceased) { %><span class="label label-important">deceased</span><% } %>
             </h2>
+            {% if not char.is_deceased and not char.is_retired %}
             <div class="span2 char_actions">
                 <span class="btn-group pull-right">
                     <button class="btn save-char">Save</button>
@@ -860,6 +865,7 @@
                     </ul>
                 </span>
             </div>
+            {% endif %}
         </div>
 {% if user.is_staff or user.is_superuser %}<div>Player: <a><%= user.first_name %> <%= user.last_name %></a> ( <a href="mailto:<%= user.email %>"><%= user.email %></a> )</div>{% endif %}
         <h3>Attributes:</h3>
@@ -901,9 +907,11 @@
 
         </div>
 
+        {% if not char.is_deceased and not char.is_retired %}
         <div class="form-actions"><button class="btn btn-info save-char">Save</button> <span>Please note that once you save you will be unable to remove skills or reduce attributes without going through staff</span>
 
         </div>
+        {% endif %}
 
     </div>
     <div id="skills-popup" class="modal fade hide"></div>
