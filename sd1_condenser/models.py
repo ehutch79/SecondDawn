@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 
 from django_extensions.db.fields import AutoSlugField, UUIDField
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class PersonalProfile(models.Model):
     id = UUIDField(version=4, primary_key=True)
@@ -26,13 +29,14 @@ class PersonalProfile(models.Model):
 
     def get_current_char(self):
         chars = Character.objects.filter(is_deceased=False, is_retired=False, is_npc=False, user=self.user)
+        print chars
         if self.user.is_staff or self.user.is_superuser:
             return None
         if chars.count() > 1:
             return 'Multiple Chars'
         if chars.count() == 1:
             return chars[0]
-        else: 
+        else:
             return None
 
     def get_prev_char(self):
@@ -180,6 +184,11 @@ class Character(models.Model):
     background = models.TextField(blank=True, null=True)
     background_approved = models.BooleanField(default=False)
 
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        ordering = ['-created']
+
     def __unicode__(self):
         return self.name
 
@@ -298,3 +307,26 @@ class ProfessionBought(models.Model):
 
     class Meta:
         verbose_name_plural = "Professions Bought"
+
+@receiver(post_save, sender=User)
+def make_profiles(sender, **kwargs):
+    user = kwargs['instance']
+
+    try:
+        eeps = user.eepsbank
+    except:
+        eeps = EepsBank()
+        eeps.user = user
+
+    try:
+        prof = user.personalprofile
+    except:
+        prof = PersonalProfile()
+        prof.user = user
+
+    try:
+        eeps.save()
+        prof.save()
+    except:
+        pass
+
