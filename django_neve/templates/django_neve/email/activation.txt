@@ -1,0 +1,5 @@
+{% load url from future %}Hey there {{ new_user.get_profile.display_name }},
+
+In order to activate your account, you're going to need to click this link below:
+
+http://{{ site.domain }}{% url 'django_neve_activate_user' pk=new_user.get_profile.pk %}

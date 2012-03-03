@@ -10,6 +10,17 @@
         &nbsp;
     </div>
     <div class="span6">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-message {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        <a class="close" href="#">×</a>
+                        <p><strong>{{ message }}</strong></p>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="POST" action="{% url 'django_neve_login' %}">
         <fieldset>
         <legend>Login</legend>
@@ -17,7 +28,7 @@
         {% csrf_token %}
         </fieldset>
         <div class="actions">
-            <input type="submit" class="btn primary" value="Login"> or <a href="{% url 'django_neve_register' %}">Register</a>.<br><br>Perhaps you <a href="">Forgot your password</a>
+            <input type="submit" class="btn primary" value="Login"> or <a href="{% url 'django_neve_register' %}">Register</a>.<br><br>Perhaps you forgot your password, in which case, please email <a href="mailto:seconddawnlarp@gmail.com">seconddawnlarp@gmail.com</a> to have a new password set.
         </div>
         </form>
     </div>

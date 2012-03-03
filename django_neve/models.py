@@ -16,6 +16,16 @@ class Profile(models.Model):
     
     display_name = models.CharField(max_length=75)
     
+    is_banned = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_banned:
+            self.user.is_active = False
+            self.user.set_unusable_password()
+            self.user.save()
+
+        super(Profile, self).save(*args, **kwargs)
+
     def __unicode__(self):
         return self.display_name
 

@@ -17,6 +17,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import Http404
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.core.mail import send_mail
 
 from django_neve.models import Profile, ActivityLog, SocialNetworkLink
 
@@ -165,7 +166,7 @@ def register_view(request):
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
     
-            user.is_active = True
+            user.is_active = False
             user.save()
             
             if AKISMET_KEY:
@@ -231,6 +232,16 @@ def register_view(request):
                 login(request, authenticate(username=user.email, password=form.cleaned_data['password']))
                 return HttpResponseRedirect(reverse('django_neve_profile_edit', kwargs={'slug': profile.slug}))
             else:
+
+                sender = settings.EMAIL_FROM
+                message = render_to_string('django_neve/email/activation.txt', {'new_user': user}, context_instance=RequestContext(request))
+                
+                send_mail('{site} account activation'.format(site=Site.objects.get_current().name),
+                            message, 
+                            sender,
+                            [user.email], fail_silently=False)
+                messages.info(request, 'You should be receiving an email shortly with instructions on how to activate your account.')
+
                 return HttpResponseRedirect('/')
             
         else:
@@ -367,3 +378,16 @@ def profile_edit_view(request, slug=None):
     response = HttpResponse("Error: Method not allowed")
     response.status_code=405
     return response
+
+
+def user_activate(request, pk=None):
+    profile = get_object_or_404(Profile, pk=pk)
+    if profile.is_banned:
+        return HttpResponseForbidden('You have been banned')
+
+    profile.user.is_active = True
+    messages.info(request, 'Your account is active and you may login now')
+
+    return HttpResponseRedirect('/')
+
+

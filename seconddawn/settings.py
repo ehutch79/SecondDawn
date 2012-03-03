@@ -15,6 +15,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+EMAIL_FROM = "App Name <app@email.com>"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
