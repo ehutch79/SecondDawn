@@ -386,6 +386,8 @@ def user_activate(request, pk=None):
         return HttpResponseForbidden('You have been banned')
 
     profile.user.is_active = True
+    profile.user.save()
+    
     messages.info(request, 'Your account is active and you may login now')
 
     return HttpResponseRedirect('/')
