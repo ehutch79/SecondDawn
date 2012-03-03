@@ -114,7 +114,7 @@
             <tr><th>Name</th><th>Build Spent</th><th>Status</th></tr>
 
           {% for char in user.character_set.all %}
-            <tr><td>{{ char.name }}</td><td>{{ char.build_spent }}</td><td>
+            <tr><td><a href="{{ char.get_absolute_url }}">{{ char.name }}</a></td><td>{{ char.build_spent }}</td><td>
               {% if char.is_deceased %}Deceased{% else %}
                 {% if char.is_retired %}Retired{% else %}Active{% endif %}
               {% endif %}
@@ -132,6 +132,16 @@
 
 
           </table>
+          {% endif %}
+        </div>
+
+        <div class="span6">
+          {% if not user.is_staff and not user.is_superuser %}
+          <h3>Administrivia</h3>
+            <ul>
+              <li>You currently have {{ user.eepsbank.eeps}} xp to spend.</li>
+              <li>You have registered for {{ user.eventregistration_set.count }} events</li>
+            </ul>
           {% endif %}
         </div>
 
