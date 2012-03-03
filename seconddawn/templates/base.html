@@ -107,7 +107,33 @@
         {% endif %}
         <div class="row" id="contents">
         {% block contents %}
+        <div class="span6">
+          {% if not user.is_staff and not user.is_superuser %}
+          <h2>Your Characters</h2>
+          <table class="table table-striped">
+            <tr><th>Name</th><th>Build Spent</th><th>Status</th></tr>
 
+          {% for char in user.character_set.all %}
+            <tr><td>{{ char.name }}</td><td>{{ char.build_spent }}</td><td>
+              {% if char.is_deceased %}Deceased{% else %}
+                {% if char.is_retired %}Retired{% else %}Active{% endif %}
+              {% endif %}
+            </td></tr>
+          {% empty %}
+            <tr>
+              <td colspan=3>You don't have any characters yet. Click to <a href="{% url 'condenser_char_create' %}">create a new character</a></td>
+            </tr>
+          {% endfor %}
+          {% if user.character_set.count and not user.personalprofile.get_current_char %}
+            <tr>
+              <td colspan=3>You don't have an active character. Click to <a href="{% url 'condenser_char_create' %}">create a new character</a></td>
+            </tr>
+          {% endif %}
+
+
+          </table>
+          {% endif %}
+        </div>
 
         {% endblock contents %}
 
