@@ -19,7 +19,7 @@ class EmailBackend:
         if len(bits) == 3 and bits[1] == u'as':
             username = bits[0]
             asusername = bits[2]
-        print username
+        
         if email_re.search(username):
             try:
                 users = User.objects.filter(email__iexact=username)

@@ -187,7 +187,7 @@ def character_adjust_attributes(request, slug):
 
     profession_list = dict([(k[-37:-1], v) for k, v in request.POST.items() if k[:11] == 'professions'])
     has_list = []
-    print profession_list
+    
 
     for professionbought in char.professions.all():
         if professionbought.profession.pk not in profession_list and ( request.user.is_superuser or request.user.is_staff):

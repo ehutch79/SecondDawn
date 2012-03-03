@@ -29,7 +29,7 @@ class PersonalProfile(models.Model):
 
     def get_current_char(self):
         chars = Character.objects.filter(is_deceased=False, is_retired=False, is_npc=False, user=self.user)
-        print chars
+        
         if self.user.is_staff or self.user.is_superuser:
             return None
         if chars.count() > 1:
