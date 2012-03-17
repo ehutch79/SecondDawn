@@ -54,12 +54,14 @@
 				{% endif %}</td>
 
 				{% endwith %}
-				<td class="dropdown">
-					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_grant_eeps' slug=player.username %}" class="give-xp-dialog">Give XP</a></li>{% endif %}
-                        
-                    </ul>
+				<td>
+					<div class="dropdown pull-right">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
+	                    <ul class="dropdown-menu">
+	                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_grant_eeps' slug=player.username %}" class="give-xp-dialog">Give XP</a></li>{% endif %}
+	                        
+	                    </ul>
+	                </div>
                 </td>
 
 			</tr>
