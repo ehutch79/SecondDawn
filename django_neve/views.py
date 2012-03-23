@@ -181,16 +181,19 @@ def register_view(request):
                     log.type='alert'
                     log.action = 'Registration: Akistmet key not valid'
                     log.save()
-                    
-                spam = akismet.comment_check(None, {
-                    'user_ip': request.META['REMOTE_ADDR'],
-                    'user_agent': request.META['HTTP_USER_AGENT'],
-                    'referrer': request.META['HTTP_REFERER'],
-                    'comment_type': 'registration',
-                    'comment_author_email': user.email,
-                    'comment_author': '{first_name} {last_name}'.format(first_name=user.first_name, last_name=user.last_name),
-                    }, build_data=False)
+                try:
+                    spam = akismet.comment_check(None, {
+                        'user_ip': request.META['REMOTE_ADDR'],
+                        'user_agent': request.META['HTTP_USER_AGENT'],
+                        'referrer': request.META['HTTP_REFERER'],
+                        'comment_type': 'registration',
+                        'comment_author_email': user.email,
+                        'comment_author': '{first_name} {last_name}'.format(first_name=user.first_name, last_name=user.last_name),
+                        }, build_data=False)
                 
+                except:
+                    spam = False
+
                 if spam:
                     log = ActivityLog()
                     log.ip = request.META['REMOTE_ADDR']
