@@ -154,6 +154,17 @@
               <li>You have registered for {{ user.eventregistration_set.count }} events</li>
             </ul>
           {% endif %}
+
+          {% if user.is_superuser %}
+            
+            {% get_npc_list %}
+            <table class="table table-striped">
+              <tr><th>NPC</th><th>Build</th><th>Made by</th></tr>
+              {% for npc in npc_list %}
+                <tr><td>{{ npc.name }}</td><td>{{ npc.build_spent }}</td><td>{{ npc.user.get_profile.display_name }}</td></tr>
+              {% endfor %}
+            </table>
+          {% endif %}
         </div>
 
         {% endblock contents %}
