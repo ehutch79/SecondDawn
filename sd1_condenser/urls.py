@@ -17,7 +17,7 @@ urlpatterns = patterns('',
 
     url(r'^player/list/$', 'sd1_condenser.views.player_list', name='condenser_player_list'),
     url(r'^player/(?P<slug>[-\w\d]+)/give_eeps/$', 'sd1_condenser.views.player_grant_eeps', name='condenser_player_grant_eeps'),
-
+    url(r'^player/(?P<slug>[-\w\d]+)/staff_view/$', 'sd1_condenser.views.player_staff_view', name='condenser_player_staff_view'),
 
     url(r'^char/create/$', 'sd1_condenser.views.character_create', name='condenser_char_create'),
 

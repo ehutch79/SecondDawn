@@ -50,6 +50,20 @@ def character_view(request, slug=None):
 
     return render_to_response(template_name, {'char': char, 'slug': slug}, context_instance=RequestContext(request))
 
+
+@login_required
+def player_staff_view(request, slug=None):
+    template_name = 'condenser/player/staff_view_full.html'
+
+    if not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden('Staff only, sorry')
+    
+    user = get_object_or_404(User, username=slug)
+    
+    return render_to_response(template_name, {'player': user}, context_instance=RequestContext(request))
+
+ 
+
 @login_required
 def character_create(request):
     template_name = 'condenser/char_create_full.html'
