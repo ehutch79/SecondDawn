@@ -33,7 +33,7 @@
     var Char = Backbone.Model.extend({
         urlRoot: "/condenser/char/api/v1/char/",
         defaults: {
-            build_cap: 50
+            build_cap: {% if user.is_superuser %}9000{% else %}50{% endif %}
         }
     });
 
