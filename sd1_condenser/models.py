@@ -92,7 +92,7 @@ class Faction(models.Model):
         return self.name
 
     def player_members(self):
-        return self.standings.filter(member__is_npc=False)
+        return self.standings.filter(member__is_npc__exact=False)
 
 
 class Header(models.Model):
