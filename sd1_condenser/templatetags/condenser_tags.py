@@ -27,7 +27,7 @@ class GetNPCNode(template.Node):
         pass
 
     def render(self, context):
-        context['npc_list'] = Charecter.objects.filter(is_npc=True)
+        context['npc_list'] = Character.objects.filter(is_npc=True)
         return ''
 
 register.tag('get_faction_list', get_faction_list)
