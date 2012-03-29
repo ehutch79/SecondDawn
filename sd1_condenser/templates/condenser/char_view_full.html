@@ -862,6 +862,7 @@
                             <li><a>Kill Character</a></li>
                         {% endif %}
                         {% if char.is_new and char.user == user and not in_build_blackout %}<li><a onclick="return confirm('Are you sure you want to delete this character? You can NOT undo this!');" href="{% url 'condenser_char_delete' slug=char.slug %}">Delete Character</a></li>{% endif %}
+                        {% if char.is_npc and user.is_superuser %}<li><a onclick="return confirm('Are you sure you want to delete this character? You can NOT undo this!');" href="{% url 'condenser_char_delete' slug=char.slug %}">Delete Character</a></li>{% endif %}
                     </ul>
                 </span>
             </div>

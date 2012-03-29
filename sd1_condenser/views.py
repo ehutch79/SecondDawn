@@ -297,7 +297,7 @@ def char_delete(request, slug):
 
     now = datetime.datetime.now()
 
-    if request.user != char.user or not char.is_new:
+    if ( request.user != char.user or not char.is_new ) and ( not request.user.is_superuser and not request.user.is_staff):
         return HttpResponseForbidden('You may only delete your own new characters')
 
     build_events = EventInfo.objects.filter(build_blackout_start__lte=now, event_end__gte=now)
