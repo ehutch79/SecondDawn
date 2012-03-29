@@ -159,10 +159,11 @@
             
             {% get_npc_list %}
             <table class="table table-striped">
-              <tr><th>NPC</th><th>Build</th><th>Made by</th></tr>
+              <tr><th>NPC</th><th>Build Spent</th><th>Made by</th></tr>
               {% for npc in npc_list %}
                 <tr><td><a href="{{ npc.get_absolute_url }}">{{ npc.name }}</a></td><td>{{ npc.build_spent }}</td><td>{{ npc.user.get_profile.display_name }}</td></tr>
               {% endfor %}
+              <tr><td colspan=3><a class="pull-right btn" href="{% url 'condenser_char_create' %}">Create New NPC</a></td></tr>
             </table>
           {% endif %}
         </div>
