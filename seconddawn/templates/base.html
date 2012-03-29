@@ -140,7 +140,7 @@
             <table class="table table-striped">
               <tr><th>Faction</th><th>Members</th></tr>
               {% for faction in factions_list %}
-                <tr><td>{{ faction.name }}</td><td>{{ faction.standings.count }}</td></tr>
+                <tr><td>{{ faction.name }}</td><td>{{ faction.player_members.count }}</td></tr>
               {% endfor %}
             </table>
           {% endif %}
