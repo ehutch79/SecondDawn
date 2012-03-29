@@ -58,3 +58,6 @@ admin.site.register(Skill, SkillAdmin)
 class ProfileAdmin(admin.ModelAdmin):
     pass
 admin.site.register(PersonalProfile, ProfileAdmin)
+
+
+admin.site.register(EepsRecord, admin.ModelAdmin)
