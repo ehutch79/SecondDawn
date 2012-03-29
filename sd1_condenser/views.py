@@ -52,21 +52,6 @@ def character_view(request, slug=None):
 
 
 @login_required
-def player_staff_view(request, slug=None):
-    template_name = 'condenser/player/staff_view_full.html'
-
-    if not request.user.is_staff and not request.user.is_superuser:
-        return HttpResponseForbidden('Staff only, sorry')
-    
-    user = get_object_or_404(User, username=slug)
-    
-    all_eeps = EepsRecord.objects.all()
-
-    return render_to_response(template_name, {'player': user, 'records': all_eeps}, context_instance=RequestContext(request))
-
- 
-
-@login_required
 def character_create(request):
     template_name = 'condenser/char_create_full.html'
     if request.is_ajax():
@@ -286,7 +271,7 @@ def player_grant_eeps(request, slug):
         return HttpResponseForbidden('method not allowed')
 
     eeps = int(request.POST.get('eeps', '0'))
-    reason = request.POST.get('eeps', '')
+    reason = request.POST.get('reason', '')
 
     try:
         eeps_bank = player.eepsbank
@@ -306,6 +291,21 @@ def player_grant_eeps(request, slug):
 
     return HttpResponse(json.dumps({'eeps': player.eepsbank.eeps, 'pk': player.pk }), mimetype="application/json")
 
+
+@login_required
+def player_staff_view(request, slug=None):
+    template_name = 'condenser/player/staff_view_full.html'
+
+    if not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden('Staff only, sorry')
+    
+    user = get_object_or_404(User, username=slug)
+    
+    all_eeps = EepsRecord.objects.all()
+
+    return render_to_response(template_name, {'player': user, 'records': all_eeps}, context_instance=RequestContext(request))
+
+ 
 
 @login_required
 def char_delete(request, slug):
@@ -383,6 +383,13 @@ def char_buy_build(request, slug):
         chars.update(free_build=F('free_build')+to_buy)
         eeps.eeps -= cost
         eeps.save()
+
+        eeps_record = EepsRecord()
+        eeps_record.user = char.user
+        eeps_record.eeps = cost * -1
+        eeps_record.reason = 'Bought Build for {name}'.format(name=char.name) 
+        eeps_record.save()
+
 
         return HttpResponse('success buying {to_buy} build for {cost} xp'.format(to_buy=to_buy, cost=cost) )
     else:
