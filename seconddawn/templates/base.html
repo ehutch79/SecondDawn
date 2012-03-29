@@ -133,6 +133,17 @@
 
           </table>
           {% endif %}
+
+          {% if user.is_superuser %}
+            {% load condenser_tags %}
+            {% get_faction_list %}
+            <table class="table table-striped">
+              <tr><th>Faction</th><th>Members</th></tr>
+              {% for faction in faction_list %}
+                <tr><td>faction.name</td><td>faction.standings.count</td></tr>
+              {% endfor %}
+            </table>
+          {% endif %}
         </div>
 
         <div class="span6">
