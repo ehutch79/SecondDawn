@@ -139,7 +139,7 @@
             {% get_faction_list %}
             <table class="table table-striped">
               <tr><th>Faction</th><th>Members</th></tr>
-              {% for faction in faction_list %}
+              {% for faction in factions_list %}
                 <tr><td>faction.name</td><td>faction.standings.count</td></tr>
               {% endfor %}
             </table>
