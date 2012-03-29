@@ -91,6 +91,9 @@ class Faction(models.Model):
     def __unicode__(self):
         return self.name
 
+    def player_members(self):
+        return self.standings.filter(member__is_npc=False,member__is_deceased=False,member__is_retired=False)
+
 
 class Header(models.Model):
     id = UUIDField(version=4, primary_key=True)
