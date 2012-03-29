@@ -59,5 +59,6 @@ class ProfileAdmin(admin.ModelAdmin):
     pass
 admin.site.register(PersonalProfile, ProfileAdmin)
 
-
-admin.site.register(EepsRecord, admin.ModelAdmin)
+class EepsRecordAdmin(admin.ModelAdmin):
+    readonly_fields = ['eeps', ]
+admin.site.register(EepsRecord, EepsRecordAdmin)
