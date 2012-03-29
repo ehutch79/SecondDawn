@@ -60,7 +60,9 @@ def player_staff_view(request, slug=None):
     
     user = get_object_or_404(User, username=slug)
     
-    return render_to_response(template_name, {'player': user}, context_instance=RequestContext(request))
+    all_eeps = EepsRecord.objects.all()
+
+    return render_to_response(template_name, {'player': user, 'records': all_eeps}, context_instance=RequestContext(request))
 
  
 
