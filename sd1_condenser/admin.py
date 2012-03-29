@@ -61,4 +61,5 @@ admin.site.register(PersonalProfile, ProfileAdmin)
 
 class EepsRecordAdmin(admin.ModelAdmin):
     readonly_fields = ['eeps', ]
+    list_display = ('__unicode__', 'eeps', 'reason',)
 admin.site.register(EepsRecord, EepsRecordAdmin)
