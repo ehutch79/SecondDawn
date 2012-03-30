@@ -64,7 +64,8 @@ class EepsRecord(models.Model):
     def __unicode__(self):
         return self.user.email
 
-
+    class Meta:
+        ordering = ['when',]
 
 class ContactInfo(models.Model):
     CONTACTTYPE_CHOICES = (
