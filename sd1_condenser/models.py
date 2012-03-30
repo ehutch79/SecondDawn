@@ -59,6 +59,8 @@ class EepsRecord(models.Model):
     eeps = models.IntegerField(default=0, editable=False)
     reason = models.TextField(blank=True, null=True)
 
+    when = models.DateTimeField(auto_now_add=True)
+
     def __unicode__(self):
         return self.user.email
 

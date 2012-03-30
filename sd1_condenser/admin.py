@@ -60,6 +60,6 @@ class ProfileAdmin(admin.ModelAdmin):
 admin.site.register(PersonalProfile, ProfileAdmin)
 
 class EepsRecordAdmin(admin.ModelAdmin):
-    readonly_fields = ['eeps', ]
-    list_display = ('__unicode__', 'eeps', 'reason',)
+    readonly_fields = ['eeps', 'when', ]
+    list_display = ('__unicode__', 'eeps', 'reason', 'when', )
 admin.site.register(EepsRecord, EepsRecordAdmin)
