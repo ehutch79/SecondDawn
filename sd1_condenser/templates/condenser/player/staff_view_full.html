@@ -10,7 +10,7 @@
 <table class="table table-striped">
     <tr><th>Amount</th><th>Reason</th><th>When</th></tr>
     {% for eppsrecord in records %}
-    <tr><td>{{ eepsrecord.eeps }}</td><td>{{ eepsrecord.reason }}</td><td>{{ eepsrecord.when }}</td></tr>
+    <tr id="{{ eepsrecord.pk }}"><td>{{ eepsrecord.eeps }}</td><td>{{ eepsrecord.reason }}</td><td>{{ eepsrecord.when }}</td></tr>
 
     {% endfor %}
 
