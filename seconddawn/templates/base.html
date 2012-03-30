@@ -136,13 +136,35 @@
 
           {% if user.is_superuser %}
             {% load condenser_tags %}
-            {% get_faction_list %}
-            <table class="table table-striped">
-              <tr><th>Faction</th><th>Members</th></tr>
-              {% for faction in factions_list %}
-                <tr><td>{{ faction.name }}</td><td>{{ faction.player_members.count }}</td></tr>
-              {% endfor %}
-            </table>
+
+          <ul class="nav nav-tabs">
+            <li class="active" ><a href="#factions" data-toggle="tab">Factions</a></li>
+            <li><a href="#profs" data-toggle="tab">Professions</a></li>
+            
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane active" id="factions">
+              {% get_faction_list %}
+              <table class="table table-striped">
+                <tr><th width=60%>Faction</th><th width=40%>Members</th></tr>
+                {% for faction in factions_list %}
+                  <tr><td>{{ faction.name }}</td><td>{{ faction.player_members.count }}</td></tr>
+                {% endfor %}
+              </table>
+            </div>
+
+            <div class="tab-pane" id="profs">
+              {% get_profession_list %}
+              <table class="table table-striped">
+                <tr><th width=60%>Profession</th><th width=20%>Members</th><th width=20%>Max</th></tr>
+                {% for profession in professions_list %}
+                  <tr><td>{{ profession.name }}</td><td>{{ profession.player_members.count }}</td><td>{{ profession.max_score.max_score|default:"0" }}</tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+
           {% endif %}
         </div>
 
@@ -200,7 +222,13 @@ $(function() {
 });
 </script>
   
-  {% block extra-body-js %}{% endblock %}
+  {% block extra-body-js %}
+  <script type="text/javascript">
+    $(function () {
+      //$('a[data-toggle="tab"]').tab('show');
+    });
+  </script>
+  {% endblock %}
 
 
 <script type="text/javascript">

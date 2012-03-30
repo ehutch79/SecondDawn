@@ -1,6 +1,7 @@
 import math
 from django.db import models
 from django.db.models import Q
+from django.db.models import Avg, Max, Min, Count
 from django.contrib.auth.models import User
 
 from django_extensions.db.fields import AutoSlugField, UUIDField
@@ -117,6 +118,12 @@ class Profession(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def player_members(self):
+        return self.bought_by.filter(char__is_npc=False,char__is_deceased=False,char__is_retired=False)
+
+    def max_score(self):
+        return self.bought_by.aggregate(max_score=Max('score'))
 
 
 class Skill(models.Model):

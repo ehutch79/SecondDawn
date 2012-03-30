@@ -30,5 +30,17 @@ class GetNPCNode(template.Node):
         context['npc_list'] = Character.objects.filter(is_npc=True)
         return ''
 
-register.tag('get_faction_list', get_faction_list)
 register.tag('get_npc_list', get_npc_list)
+
+def get_profession_list(parser, token):
+    return GetProfNode()
+
+class GetProfNode(template.Node):
+    def __init__(self):
+        pass
+
+    def render(self, context):
+        context['professions_list'] = Profession.objects.all()
+        return ''
+
+register.tag('get_profession_list', get_profession_list)
