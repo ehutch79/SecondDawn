@@ -9,8 +9,8 @@
 <div class="span6">
 <table class="table table-striped">
     <tr><th>Amount</th><th>Reason</th><th>When</th></tr>
-    {% for eppsrecord in records %}
-    <tr id="{{ eepsrecord.pk }}"><td>{{ eepsrecord.eeps }}</td><td>{{ eepsrecord.reason }}</td><td>{{ eepsrecord.when }}</td></tr>
+    {% for record in player.eepsrecord_set.all %}
+    <tr id="{{ record.pk }}"><td>{{ record.eeps }}</td><td>{{ record.reason }}</td><td>{{ record.when }}</td></tr>
 
     {% endfor %}
 
