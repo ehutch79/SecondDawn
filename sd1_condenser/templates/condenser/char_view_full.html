@@ -339,7 +339,7 @@
             
             _.each(this.collection.models, function(skill) { 
 
-                self.addSkill(skill); 
+                char_view.skills_list_view.addSkill(skill); 
             });
 
             return this;
@@ -590,7 +590,7 @@
             
             _.each(this.collection.models, function(profession) { 
 
-                self.addProfession(profession); 
+                char_view.professions_list_view.addProfession(profession); 
             });
 
             return this;
@@ -757,6 +757,7 @@
             this.professions_list_view = new ProfessionsView({ model: this.model });
             this.professions_list_view.setElement($(this.$el).find('#profession-popup').first());
             this.professions_list_view.render();
+
 
             this.buy_build_view = new BuyBuildView({ model: this.model });
             this.buy_build_view.setElement($(this.$el).find('#eeps-popup').first());
