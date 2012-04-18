@@ -496,12 +496,12 @@
 
         },
         render: function() {
-            var self = this
+            prof_self = this;
             this.$el.empty();
             this.$el.html(this.template({char: this.model.attributes, orig: this.model.orig.attributes}));
 
             _.each(this.collection.models, function(profession) { 
-                self.addProfession(profession); 
+                prof_self.addProfession(profession); 
             });
             return this;
         },
