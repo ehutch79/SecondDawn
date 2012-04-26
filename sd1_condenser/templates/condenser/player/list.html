@@ -59,7 +59,7 @@
 						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> <span class="caret"></span></a>
 	                    <ul class="dropdown-menu">
 	                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_grant_eeps' slug=player.username %}" class="give-xp-dialog">Give XP</a></li>{% endif %}
-	                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_grant_eeps' slug=player.username %}" class="event-reg-dialog">Set event reg.</a></li>{% endif %}
+	                        {% if user.is_superuser %}<li><a data-name="{{ player.get_profile.display_name }}" data-action="{% url 'condenser_player_events' slug=player.username %}" class="event-reg-dialog">Set event reg.</a></li>{% endif %}
 	                    </ul>
 	                </div>
                 </td>
@@ -121,6 +121,7 @@
 
 {% endblock %}
 
+<script type="text/javascript">
 {% block extra-js %}
 
 	var oTable = $('#player-list').dataTable({ 
@@ -140,7 +141,6 @@
 
     $('.modal').on('click','.btn.cancel', function(e) {
         $(e.target).parents('.modal').modal('hide');
-
     });
 
     $('#player-list').on('click', '.give-xp-dialog', function(e) {
@@ -152,9 +152,69 @@
     });
 
     $('#player-list').on('click', '.event-reg-dialog', function(e) {
+        $target = $(e.target);
         $popup = $('#reg-popup');
-        
+        $body = $popup.find('.modal-body');
+        $body.html('loading');
+
+        $.ajax($target.attr('data-action'),{
+                type: 'GET',
+                //data: data,
+                dataType: 'json',
+                success: function(data) {
+                    $form = $('<form method="POST"></form>');
+                    $form.attr('action', $target.attr('data-action'));
+                    $fieldset = $('<fieldset></fieldset>');
+                    $form.append($fieldset);
+                    $fieldset.append('<h3>Event Registrations for <span class="player-name">' + $target.attr('data-name') + '</span></h3>')
+
+                    data.forEach( function(val, idx) {
+                        $grp = $('<div class="control-group event-group"></div>');
+                        $label =  $('<label class="control-label">' + val.name + '</label>');
+                        $grp.append($label);
+                        $ctrls = $('<div class="controls"></div>');
+                        
+                        $input = $('<select name="event[' + val.pk + ']" id="event-select-' + val.pk + '"><option value="">----------</option></select>');
+                        val.options.forEach(function(option, idx) {
+                            $option = $('<option value="' + option.pk +'">' + option.name +'</option>');
+                            if(option.pk == val.set_as) { $option.attr('selected','selected'); }
+                            $input.append($option);
+                        });
+
+                        $ctrls.append($input);
+                        $grp.append($ctrls);
+
+                        $fieldset.append($grp);
+                
+                    
+                
+            
+                    });
+
+                
+                    $body.html($form);
+                }
+            });
+
         $popup.modal('show');
+    });
+
+    $('#reg-popup').on('click', '.save', function(e) {
+        form = $('#reg-popup').find('form').first();
+        data = form.serialize();
+        $('#reg-popup .btn').attr('disabled','disabled');        
+
+
+        $.ajax(form.attr('action'),{
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function(data) {
+                    $('#reg-popup .btn').removeAttr('disabled');
+                    $('#reg-popup').modal('hide');
+                }
+            });
+
     });
 
     $('#eeps-popup').on('click', '.save', function(e) {
@@ -190,4 +250,4 @@
     });
 
 {% endblock %}
-
+</script>

@@ -13,11 +13,12 @@ from django.contrib import messages
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
+from django.utils.timezone import utc
 
 from sd1_condenser.models import *
 from sd1_condenser.forms import CreateCharacterForm
 
-from sd1_events.models import EventInfo
+from sd1_events.models import *
 
 import logging
 
@@ -302,9 +303,7 @@ def player_staff_view(request, slug=None):
     user = get_object_or_404(User, username=slug)
     
     all_eeps = EepsRecord.objects.all()
-    for blah in all_eeps:
-        print blah
-
+    
     return render_to_response(template_name, {'player': user, 'records': all_eeps}, context_instance=RequestContext(request))
 
  
@@ -398,4 +397,65 @@ def char_buy_build(request, slug):
         return HttpResponseForbidden('Failure buying {to_buy} build for {cost} xp, you only have {eeps} xp'.format(to_buy=to_buy, cost=cost, eeps=char.user.eepsbank.eeps) )
 
     #return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
+
+
+
+def player_upcoming_events(request, slug):
+    player = get_object_or_404(User, username=slug)
+
+    if request.method == 'GET':
+        player_events = []
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
+        yesterday = now - datetime.timedelta(days=2)
+
+        events = EventInfo.objects.filter(event_end__gte=yesterday)
+        for event in events:
+            player_reg = event.eventregistration_set.filter(user=player)
+
+            reg_opt = None
+
+            if player_reg.count():
+                reg_opt = player_reg[0].option.pk
+
+
+            element = {
+                'name': str(event),
+                'pk': event.pk,
+                'options': [{'pk':option.pk, 'name':option.name} for option in event.registrationoptions_set.all() ],
+                'set_as': reg_opt
+            }
+            player_events.append(element)
+
+        return HttpResponse(json.dumps(player_events), mimetype="application/json");
+
+
+    for item in request.POST:
+        if item[0:5] != "event":
+            continue
+        
+        pk = item[6:-1]
+        event = EventInfo.objects.get(pk=pk)
+
+
+        try:
+            reg = EventRegistration.objects.get(event=event, user=player)
+        except EventRegistration.DoesNotExist:
+            reg = EventRegistration()
+            reg.user = player
+            reg.event = event
+
+        if not request.POST[item]:
+            reg.delete()
+            continue
+
+        option = event.registrationoptions_set.filter(pk=request.POST[item])[0]
+
+        reg.option = option
+        reg.save()
+
+    return HttpResponse('', mimetype="application/json");
+
+
+    
+
 

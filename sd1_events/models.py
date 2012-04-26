@@ -54,11 +54,14 @@ class EventRegistration(models.Model):
     event = models.ForeignKey(EventInfo, db_index=True)
     option = models.ForeignKey(RegistrationOptions, db_index=True)
 
-    attended = models.BooleanField(default=False)
-    eeps = models.IntegerField(default=0)
     due = models.DecimalField(default=0.00, decimal_places=2, max_digits=10)
     paid = models.BooleanField(default=False)
     amount_paid = models.DecimalField(default=0.00, decimal_places=2, max_digits=10)
+
+    attended = models.BooleanField(default=False)
+    eeps = models.IntegerField(default=0)
+    
+    
 
     def __unicode__(self):
         return '{email} attending {event}'.format(email=self.user.email, event=self.event)
