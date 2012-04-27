@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     url(r'^register/$', 'sd1_events.views.register_for_events', name='register_for_events'),
     url(r'^register/complete/(?P<pk>[-\w\d]+)/$', 'sd1_events.views.event_reg_complete', name='event_registration_complete'),
     
+    url(r'^(?P<pk>[-\w\d]+)/report-card/$', 'sd1_events.views.event_report_card', name='event_report_card'),
+
     url(r'^$', 'sd1_events.views.event_list', name='event_list'),
     
 )

@@ -61,7 +61,7 @@ class EventRegistration(models.Model):
     attended = models.BooleanField(default=False)
     eeps = models.IntegerField(default=0)
     
-    
+    reportcard_submitted = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '{email} attending {event}'.format(email=self.user.email, event=self.event)
@@ -87,4 +87,34 @@ class Receipt(models.Model):
 
     def __unicode__(self):
         return '{email} receipt'.format(email=self.user.email)
+
+class ReportCard(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    reg = models.OneToOneField(EventRegistration, db_index=True)
+
+    enjoy_yourself = models.BooleanField(default=False)
+    likely_to_return = models.BooleanField(default=False)
+
+    rules = models.IntegerField(default=0)
+    food = models.IntegerField(default=0)
+    puzzles = models.IntegerField(default=0)
+    role_playing = models.IntegerField(default=0)
+    costumes = models.IntegerField(default=0)
+    overall = models.IntegerField(default=0)
+
+    anyone_help = models.TextField(blank=True, null=True)
+
+    plots = models.TextField(blank=True, null=True)
+    goals = models.TextField(blank=True, null=True)
+
+    comments = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return 'report card'
+
+
+
+
+
+
 

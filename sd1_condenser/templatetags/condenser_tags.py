@@ -1,4 +1,7 @@
 from django import template
+from django.utils.timezone import utc
+
+import datetime
 
 from sd1_condenser.models import *
 
@@ -44,3 +47,23 @@ class GetProfNode(template.Node):
         return ''
 
 register.tag('get_profession_list', get_profession_list)
+
+
+def get_reportcard_list(parser, token):
+    return GetReportCardListNode()
+
+class GetReportCardListNode(template.Node):
+    def __init__(self):
+        pass
+
+    def render(self, context):
+        user = template.Variable('user').resolve(context)
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
+
+        reportcards = user.eventregistration_set.filter(reportcard_submitted=False, event__event_start__lte=now)
+        
+        context['missing_reportcards'] = reportcards
+
+        return ''
+
+register.tag('get_reportcard_list', get_reportcard_list)

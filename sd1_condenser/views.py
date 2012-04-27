@@ -456,6 +456,4 @@ def player_upcoming_events(request, slug):
     return HttpResponse('', mimetype="application/json");
 
 
-    
-
 

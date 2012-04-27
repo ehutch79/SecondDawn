@@ -38,7 +38,7 @@
   <!-- All JavaScript at the bottom, except for Modernizr / Respond.
        Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
        For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
-  <script src="{{ STATIC_URL }}js/libs/modernizr-2.0.6.min.js"></script>
+  <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
 </head>
 
 <body class="user-pk-{{ user.pk }}">
@@ -175,6 +175,16 @@
               <li>You currently have {{ user.eepsbank.eeps}} xp to spend.</li>
               <li>You have registered for {{ user.eventregistration_set.count }} events</li>
             </ul>
+          {% get_reportcard_list %}
+          {% if missing_reportcards.count %}
+          <p>We'd really appreciate it if you could fill in report cards for these events:</p>
+          <ul>
+          {% for event in missing_reportcards %}
+            <li><a href="{% url 'event_report_card' pk=event.pk %}">{{ event.event }}</a></li>
+          {% endfor %}
+          </ul>
+          {% endif %}
+
           {% endif %}
 
           {% if user.is_superuser %}
@@ -188,6 +198,7 @@
               <tr><td colspan=3><a class="pull-right btn" href="{% url 'condenser_char_create' %}">Create New NPC</a></td></tr>
             </table>
           {% endif %}
+
         </div>
 
         {% endblock contents %}

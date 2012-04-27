@@ -100,3 +100,41 @@ def event_reg_complete(request, pk=None):
     receipt = get_object_or_404(Receipt, pk=pk)
 
     return render_to_response('events/events_reg_complete.html', {'receipt': receipt}, context_instance=RequestContext(request))
+
+
+
+def event_report_card(request, pk):
+    reg = get_object_or_404(EventRegistration, pk=pk)
+    (card, created) = ReportCard.objects.get_or_create(reg=reg)
+
+    if reg.reportcard_submitted:
+        return HttpResponseRedirect('/')
+
+    if request.user != reg.user:
+        return HttpResponseRedirect('/')
+
+    if request.method == 'GET':
+        return render_to_response('events/events_report_card.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
+
+
+    reg.reportcard_submitted = True
+    reg.save()
+    
+
+    card.enjoy_yourself = request.POST.get('enjoy_yourself',0)
+    card.likely_to_return = request.POST.get('likely_to_return',0)
+    card.rules = request.POST['rules']
+    card.food = request.POST['food']
+    card.puzzles = request.POST['puzzles']
+    card.role_playing = request.POST['role_playing']
+    card.costumes = request.POST['costumes']
+    card.overall = request.POST['overall']
+    card.anyone_help = request.POST['anyone_help']
+    card.plots = request.POST['plots']
+    card.goals = request.POST['goals']
+    card.comments = request.POST['comments']
+
+
+    card.save()
+
+    return render_to_response('events/events_report_card_complete.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
