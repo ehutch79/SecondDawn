@@ -3,6 +3,7 @@
 
 {% load url from future %}
 {% load bootstrap %}
+{% load condenser_tags %}
 
 {% block title %}{% if char %}{{ char.name }}{% else %}Create Character{% endif %}{% endblock %}
 
@@ -33,7 +34,7 @@
     var Char = Backbone.Model.extend({
         urlRoot: "/condenser/char/api/v1/char/",
         defaults: {
-            build_cap: {% if user.is_superuser and char.is_npc %}9000{% else %}50{% endif %}
+            build_cap: {% if user.is_superuser and char.is_npc %}999{% else %}{% get_build_cap %}{% endif %}
         }
     });
 

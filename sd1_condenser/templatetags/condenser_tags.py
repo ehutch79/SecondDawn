@@ -4,7 +4,7 @@ from django.utils.timezone import utc
 import datetime
 
 from sd1_condenser.models import *
-
+from sd1_events.models import *
 
 register = template.Library()
 
@@ -80,3 +80,20 @@ class GetReportCardListNode(template.Node):
         return ''
 
 register.tag('get_reportcard_list', get_reportcard_list)
+
+
+def get_build_cap(parser, token):
+    return GetBuildCapNode()
+
+class GetBuildCapNode(template.Node):
+    def __init__(self):
+        pass
+
+    def render(self, context):
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
+
+        next_event = EventInfo.objects.filter(event_start__gt=now).order_by('event_start')[0]
+
+        return next_event.build_cap
+
+register.tag('get_build_cap', get_build_cap)
