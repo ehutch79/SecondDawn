@@ -13,7 +13,7 @@
 	<table class="table-striped table" id="player-list">
 		<thead>
 			<tr>
-				<th>Display Name</th>
+				<th>Real Name</th>
 				<th>Email</th>
 				<th>XP</th>
 				<th>Current Char</th>
@@ -25,7 +25,7 @@
 		<tbody>
 		{% for player in players %}
 			<tr id="{{ player.pk }}">
-				<td><a href="{% url 'condenser_player_staff_view' slug=player.username %}">{{ player.get_profile.display_name }}</a></td>
+				<td><a href="{% url 'condenser_player_staff_view' slug=player.username %}">{{ player.first_name }} {{ player.last_name }}</a></td>
 				<td><a href="mailto:{{ player.email }}">{{ player.email }}</a></td>
 				<td class="eeps">{{ player.eepsbank.eeps }}
 				{% with player.personalprofile.get_current_char as char %}

@@ -172,7 +172,7 @@ class Feat(models.Model):
 
 class Character(models.Model):
     id = UUIDField(version=4, primary_key=True)
-    user = models.ForeignKey(User, db_index=True, editable=False, blank=True, null=True)
+    user = models.ForeignKey(User, db_index=True, editable=True, blank=True, null=True)
     slug = AutoSlugField(populate_from='name', overwrite=True)
 
     build_spent = models.IntegerField(default=0)
