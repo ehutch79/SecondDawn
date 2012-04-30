@@ -120,8 +120,7 @@ def event_admin_view(request, pk):
 
     regs = event.eventregistration_set.all().exclude(option__npc=True).order_by('option__name')
     crunchies = event.eventregistration_set.filter(option__npc=True)
-    print crunchies
-    reportcards = event.eventregistration_set.filter(reportcard_submitted=True)
+    reportcards = event.eventregistration_set.filter(reportcard_submitted=True).order_by('reportcard__submitted', 'user__first_name')
 
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
     return render_to_response('events/admin/events_view.html', 
