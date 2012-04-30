@@ -8,9 +8,13 @@ urlpatterns = patterns('',
 #    url(r'^player/list/$', 'sd1_condenser.views.player_list', name='condenser_player_list'),
 #    url(r'^player/(?P<slug>[-\w\d]+)/give_eeps/$', 'sd1_condenser.views.player_grant_eeps', name='condenser_player_grant_eeps'),
     url(r'^register/$', 'sd1_events.views.register_for_events', name='register_for_events'),
-    url(r'^register/complete/(?P<pk>[-\w\d]+)/$', 'sd1_events.views.event_reg_complete', name='event_registration_complete'),
-    
-    url(r'^(?P<pk>[-\w\d]+)/report-card/$', 'sd1_events.views.event_report_card', name='event_report_card'),
+    url(r'^register/(?P<pk>[-\w\d]+)/complete/$', 'sd1_events.views.event_reg_complete', name='event_registration_complete'),
+    url(r'^register/(?P<pk>[-\w\d]+)/report-card/$', 'sd1_events.views.event_report_card', name='event_report_card'),
+
+
+    url(r'^list/$', 'sd1_events.views.event_admin_list', name='event_admin_list'),
+    url(r'^(?P<pk>[-\w\d]+)/$', 'sd1_events.views.event_admin_view', name='event_admin_view'),
+
 
     url(r'^$', 'sd1_events.views.event_list', name='event_list'),
     

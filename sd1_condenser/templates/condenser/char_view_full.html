@@ -687,10 +687,10 @@
 
             if (this.to_buy >= 12 ) { return false }
             {% if not char.user.eepsbank.eeps %}
-                
-            {% endif %}
-
+                return false;
+            {% else %} 
             if ({{ char.user.eepsbank.eeps }} < this.get_total_cost(this.to_buy + 1)) { return false }
+            {% endif %}
             
             this.to_buy += 1;
             this.render();

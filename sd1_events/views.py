@@ -1,4 +1,6 @@
 import math
+import datetime
+
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -13,6 +15,8 @@ from django.contrib import messages
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
+from django.utils.timezone import utc
+
 
 import stripe
 
@@ -101,6 +105,34 @@ def event_reg_complete(request, pk=None):
 
     return render_to_response('events/events_reg_complete.html', {'receipt': receipt}, context_instance=RequestContext(request))
 
+def event_admin_list(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('')
+
+    events = EventInfo.objects.all().order_by('-event_start')
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    return render_to_response('events/admin/events_list.html', 
+                            {'events': events, 'today':datetime.date(now.year, now.month, now.day) }, 
+                            context_instance=RequestContext(request))
+
+def event_admin_view(request, pk):
+    event = get_object_or_404(EventInfo, pk=pk)
+
+    regs = event.eventregistration_set.all().exclude(option__npc=True).order_by('option__name')
+    crunchies = event.eventregistration_set.filter(option__npc=True)
+    print crunchies
+    reportcards = event.eventregistration_set.filter(reportcard_submitted=True)
+
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    return render_to_response('events/admin/events_view.html', 
+                            {'event': event, 
+                            'today':datetime.date(now.year, now.month, now.day),
+                            'regs': regs,
+                            'crunchies': crunchies,
+                            'reportcards': reportcards,
+
+                             }, 
+                            context_instance=RequestContext(request))
 
 
 def event_report_card(request, pk):

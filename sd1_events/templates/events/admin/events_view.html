@@ -1,0 +1,85 @@
+{% extends 'events/base.html' %}
+
+{% load url from future %}
+
+{% block title %}{{ event }}{% endblock %}
+
+{% block contents %}
+<div class="span12"><h1>{{ event }}</h1><br></div>
+<div class="span6">
+
+    <ul class="nav nav-tabs">
+        <li class="active" ><a href="#regs" data-toggle="tab">Registrations</a></li>
+        <li><a href="#crunchies" data-toggle="tab">Crunchies</a></li>
+        <li><a href="#reportcards" data-toggle="tab">Report Cards</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="regs">
+          
+          <table class="table table-striped">
+            <tr><th>Player</th><th>Character</th><th></th></tr>
+            {% for reg in regs %}{% if not reg.user.is_superuser %}
+              {% ifchanged %}<tr><th colspan="2">{{ reg.option.name }}</th></tr>{% endifchanged %}
+              <tr>
+                {% with reg.user.personalprofile.get_current_char as char %}
+                <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
+                <td>{% if char %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a>{% endif %}</td>
+                <td>{% if reg.attended %}<span class="label">Checked in</span>{% endif %}</td>
+                {% endwith %}
+              </tr>
+            {% endif %}{% endfor %}
+          </table>
+        </div>
+
+        <div class="tab-pane" id="crunchies">
+          
+          <table class="table table-striped">
+            <tr><th>Player</th><th>Char</th></tr>
+            {% for reg in crunchies %}{% if not reg.user.is_superuser %}
+              <tr>
+                {% with reg.user.personalprofile.get_current_char as char %}
+                <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
+                <td>{% if char %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a>{% endif %}</td>
+                {% endwith %}
+              </tr>
+            {% endif %}{% endfor %}
+          </table>
+        </div>
+
+        <div class="tab-pane" id="reportcards">
+          
+          <table class="table table-striped">
+            <tr><th>Player</th><th style="text-align: center;">Had fun?</th><th style="text-align: center;">Will Return?</th><th style="text-align: center;">Overall</th></tr>
+            {% for reg in reportcards %}{% if not reg.user.is_superuser %}
+              <tr>
+                
+                <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
+                <td style="text-align: center;">
+                    {% if reg.reportcard.enjoy_yourself %}
+                        <img src="{{ STATIC_URL }}admin/img/icon-yes.gif">
+                    {% else %}
+                        <img src="{{ STATIC_URL }}admin/img/icon-no.gif">
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if reg.reportcard.likely_to_return %}
+                        <img src="{{ STATIC_URL }}admin/img/icon-yes.gif">
+                    {% else %}
+                        <img src="{{ STATIC_URL }}admin/img/icon-no.gif">
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">{{ reg.reportcard.overall }}</td>
+                
+              </tr>
+            {% endif %}{% endfor %}
+          </table>
+        </div>
+
+
+
+    </div>
+
+</div>
+
+{% endblock %}

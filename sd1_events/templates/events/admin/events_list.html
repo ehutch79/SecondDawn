@@ -1,0 +1,16 @@
+{% extends 'events/base.html' %}
+
+{% load url from future %}
+
+{% block title %}Event list{% endblock %}
+
+{% block contents %}
+<div class="span12">
+    <ul>
+        {% for event in events %}
+        <li><a href="{% url 'event_admin_view' pk=event.pk %}"><h3>{{ event }}</h3></a> <span>( {{ event.event_start }} - {{ event.event_end }} )</span></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

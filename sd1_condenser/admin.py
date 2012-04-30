@@ -27,6 +27,7 @@ class CharacterAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_new', 'is_npc', 'is_deceased', 'is_retired', 'background_approved')
     list_filter = ('is_new', 'is_npc', 'is_deceased', 'is_retired', 'background_approved')
     search_fields = ['user__email', 'name', ]
+    readonly_fields = ('user', )
 
 admin.site.register(Character, CharacterAdmin)
 

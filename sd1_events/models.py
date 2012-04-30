@@ -39,6 +39,8 @@ class RegistrationOptions(models.Model):
     cost = models.DecimalField(decimal_places=2, max_digits=10)
     new_discount = models.DecimalField(decimal_places=2, max_digits=10)
 
+    npc = models.BooleanField(default=False)
+
     def __unicode__(self):
         return self.name
 
