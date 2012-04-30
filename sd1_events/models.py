@@ -94,7 +94,7 @@ class ReportCard(models.Model):
     id = UUIDField(version=4, primary_key=True)
     reg = models.OneToOneField(EventRegistration, db_index=True)
 
-    submitted = models.DateTimeField(auto_now_add=True)
+    submitted = models.DateTimeField(auto_now=True)
 
     enjoy_yourself = models.BooleanField(default=False)
     likely_to_return = models.BooleanField(default=False)
