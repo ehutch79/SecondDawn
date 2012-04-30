@@ -59,7 +59,8 @@
                 <li class="dropdown" id="admin-menu">
                     <a data-target="#admin-menu" data-toggle="dropdown"  class="dropdown-toggle">Admin <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        {% if user.is_superuser %}<li><a href="{% url 'condenser_player_list' %}">Player List</a></li>{% endif %}
+                        <li><a href="{% url 'condenser_player_list' %}">Player List</a></li>
+                        <li><a href="{% url 'event_admin_list' %}">Event List</a></li>
                     </ul>
                 </li>
 
