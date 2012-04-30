@@ -141,6 +141,7 @@
           <ul class="nav nav-tabs">
             <li class="active" ><a href="#factions" data-toggle="tab">Factions</a></li>
             <li><a href="#profs" data-toggle="tab">Professions</a></li>
+            <li><a href="#headers" data-toggle="tab">Headers</a></li>
             
           </ul>
 
@@ -164,6 +165,18 @@
                 {% endfor %}
               </table>
             </div>
+
+
+            <div class="tab-pane" id="headers">
+              {% get_headers_list %}
+              <table class="table table-striped">
+                <tr><th width=60%>Header</th><th width=40%>Members</th></tr>
+                {% for header in headers_list %}
+                  <tr><td>{{ header.name }}</td><td>{{ header.player_members.count }}</td></tr>
+                {% endfor %}
+              </table>
+            </div>
+
           </div>
 
           {% endif %}

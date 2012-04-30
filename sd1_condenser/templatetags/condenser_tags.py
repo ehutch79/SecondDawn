@@ -49,6 +49,19 @@ class GetProfNode(template.Node):
 register.tag('get_profession_list', get_profession_list)
 
 
+def get_headers_list(parser, token):
+    return GetHeadersNode()
+
+class GetHeadersNode(template.Node):
+    def __init__(self):
+        pass
+
+    def render(self, context):
+        context['headers_list'] = Header.objects.all()
+        return ''
+
+register.tag('get_headers_list', get_headers_list)
+
 def get_reportcard_list(parser, token):
     return GetReportCardListNode()
 

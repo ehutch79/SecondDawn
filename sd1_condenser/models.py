@@ -109,6 +109,9 @@ class Header(models.Model):
     def __unicode__(self):
         return self.name
 
+    def player_members(self):
+        return self.character_set.filter(is_npc=False,is_deceased=False,is_retired=False)
+
 
 class Profession(models.Model):
     id = UUIDField(version=4, primary_key=True)
