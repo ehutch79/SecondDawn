@@ -13,7 +13,9 @@ urlpatterns = patterns('',
 
 
     url(r'^list/$', 'sd1_events.views.event_admin_list', name='event_admin_list'),
+    url(r'^(?P<event>[-\w\d]+)/report-card/(?P<pk>[-\w\d]+)/$', 'sd1_events.views.event_report_card_admin_view', name='event_report_card_admin_view'),
     url(r'^(?P<pk>[-\w\d]+)/$', 'sd1_events.views.event_admin_view', name='event_admin_view'),
+
 
 
     url(r'^$', 'sd1_events.views.event_list', name='event_list'),

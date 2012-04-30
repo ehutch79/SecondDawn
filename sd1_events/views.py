@@ -169,3 +169,11 @@ def event_report_card(request, pk):
     card.save()
 
     return render_to_response('events/events_report_card_complete.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
+
+
+def event_report_card_admin_view(request, event, pk):
+    reg = get_object_or_404(EventRegistration, pk=pk)
+    card = reg.reportcard
+
+    return render_to_response('events/admin/events_report_card.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
+

@@ -54,7 +54,7 @@
             {% for reg in reportcards %}{% if not reg.user.is_superuser %}
               <tr>
                 
-                <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
+                <td><a href="{% url 'event_report_card_admin_view' event=event.pk pk=reg.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
                 <td style="text-align: center;">
                     {% if reg.reportcard.enjoy_yourself %}
                         <img src="{{ STATIC_URL }}admin/img/icon-yes.gif">
