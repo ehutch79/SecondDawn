@@ -64,7 +64,7 @@ class EventRegistration(models.Model):
     reportcard_submitted = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return '{fname} {lname} ({email}) attending {event}'.format(email=self.user.email, event=self.event)
+        return '{fname} {lname} ({email}) attending {event}'.format(fname=self.user.first_name, lname=self.user.last_name, email=self.user.email, event=self.event)
 
     class Meta:
         ordering = ['event__event_start']
