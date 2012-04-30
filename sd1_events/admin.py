@@ -41,7 +41,7 @@ class ReceiptAdmin(admin.ModelAdmin):
 admin.site.register(Receipt, ReceiptAdmin)
 
 class ReportCardAdmin(admin.ModelAdmin):
-    list_display = ('reg', )
+    list_display = ('reg', 'enjoy_yourself', 'likely_to_return', 'rules','overall', )
     list_filter = ('reg__event', )
     search_fields = ['reg__user__email',  ]
 
