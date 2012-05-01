@@ -101,7 +101,11 @@ th { padding: 2pt 0;}
     <div class="header">
       <h1>Second Dawn</h1>&nbsp;&nbsp;&nbsp;<h3>Report Card for {{ reg.event }}</h3><br>
       <div class="char-name">{{ reg.user.first_name }} {{ reg.user.last_name }}&nbsp;&nbsp;( <a href="mailto:{{ reg.user.email }}">{{ reg.user.email }}</a> )</div>
-      {% if reg.char %}<div>Played <a href="{% url 'condenser_char_view' slug=reg.char.slug %}">{{ reg.char }}</a></div>{% endif %}
+      {% if reg.char %}<div>Played <a href="{% url 'condenser_char_view' slug=reg.char.slug %}">{{ reg.char }}</a>
+                        {% for faction in reg.char.factions.all %}<span>/ {{ faction.faction }}</span>{% endfor %}
+                        {% for header in reg.char.headers.all %}<span>/ {{ header }} </span>{% endfor %}
+                        {% for profession in reg.char.professions.all %}<span>/ {{ profession.profession }} ( {{ profession.score }} )</span>{% endfor %}
+                        </div>{% endif %}
     </div>
     <br>
     <div class="body">
