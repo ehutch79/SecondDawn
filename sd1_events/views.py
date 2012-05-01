@@ -203,6 +203,8 @@ def event_report_card_pdf(request, event):
 
     pdf = xhtml2pdf.CreatePDF(html,outfile, path=settings.STATIC_ROOT, show_error_as_pdf=True)
 
+    response = HttpResponse(outfile.getvalue(), mimetype='application/pdf')
+    response['Content-Disposition'] = 'filename="Report cards for {eventname}.pdf'.format(eventname=str(event))
+    return response
 
-    return HttpResponse(outfile.getvalue(), mimetype='application/pdf')
 
