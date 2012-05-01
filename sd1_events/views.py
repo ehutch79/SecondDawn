@@ -120,6 +120,9 @@ def event_admin_list(request):
 def event_admin_view(request, pk):
     event = get_object_or_404(EventInfo, pk=pk)
 
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
     regs = event.eventregistration_set.all().exclude(option__npc=True).order_by('option__name')
     crunchies = event.eventregistration_set.filter(option__npc=True)
     reportcards = event.eventregistration_set.filter(reportcard_submitted=True).order_by('reportcard__submitted', 'user__first_name')
@@ -174,6 +177,9 @@ def event_report_card(request, pk):
 
 
 def event_report_card_admin_view(request, event, pk):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
     reg = get_object_or_404(EventRegistration, pk=pk)
     card = reg.reportcard
 
@@ -181,6 +187,10 @@ def event_report_card_admin_view(request, event, pk):
 
 def event_report_card_pdf(request, event):
     event = get_object_or_404(EventInfo, pk=event)
+
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
     regs = event.eventregistration_set.all()
     reportcards = ReportCard.objects.filter(reg__event=event, reg__reportcard_submitted=True)
     ratings = {}
