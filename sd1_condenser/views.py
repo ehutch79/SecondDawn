@@ -442,6 +442,7 @@ def player_upcoming_events(request, slug):
         except EventRegistration.DoesNotExist:
             reg = EventRegistration()
             reg.user = player
+            reg.char = player.personalprofile.get_current_char()
             reg.event = event
 
         if not request.POST[item]:

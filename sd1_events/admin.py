@@ -1,6 +1,14 @@
 from django.contrib import admin
 from sd1_events.models import *
 
+def fix_regs_missing_chars(modeladmin, request, queryset):
+    for event in queryset:
+        for reg in event.eventregistration_set.all():
+            if not reg.char:
+                reg.char = reg.user.personalprofile.get_current_char()
+                reg.save()
+
+
 class EventOptionsAdmin(admin.TabularInline):
     model = RegistrationOptions
     fk_name = "event"
@@ -26,6 +34,7 @@ class EventRegistrationAdmin(admin.TabularInline):
 class EventAdmin(admin.ModelAdmin):
     inlines = [ EventOptionsAdmin, EventRegistrationAdmin, ]
     list_display = ('__unicode__', 'total_regs')
+    actions = [fix_regs_missing_chars]
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline

@@ -1,6 +1,6 @@
 import math
 import datetime
-
+import StringIO
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.utils.timezone import utc
 
-
+import xhtml2pdf.pisa as xhtml2pdf
 import stripe
 
 from sd1_events.models import *
@@ -55,6 +55,7 @@ def register_for_events(request):
 
             reg = EventRegistration()
             reg.user = request.user
+            reg.char = reg.user.personalprofile.get_current_char()
             reg.option = op
             reg.event = op.event
             reg.due = op.cost
@@ -177,3 +178,12 @@ def event_report_card_admin_view(request, event, pk):
 
     return render_to_response('events/admin/events_report_card.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
 
+def event_report_card_pdf(request, event):
+    event = get_object_or_404(EventInfo, pk=event)
+
+    outfile = StringIO.StringIO()
+    html = render_to_string('events/admin/events_report_card_pdf.html', {'event': event, }, context_instance=RequestContext(request))
+    pdf = xhtml2pdf.CreatePDF('',outfile)
+
+
+    return HttpResponse('')

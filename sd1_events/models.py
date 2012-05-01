@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django_extensions.db.fields import AutoSlugField, UUIDField
 
+from sd1_condenser.models import Character
 
 class EventInfo(models.Model):
     id = UUIDField(version=4, primary_key=True)
@@ -53,6 +54,7 @@ class RegistrationOptions(models.Model):
 class EventRegistration(models.Model):
     id = UUIDField(version=4, primary_key=True)
     user = models.ForeignKey(User, db_index=True)
+    char = models.ForeignKey(Character, null=True, blank=True, help_text="Character played at event")
     event = models.ForeignKey(EventInfo, db_index=True)
     option = models.ForeignKey(RegistrationOptions, db_index=True)
 
