@@ -48,7 +48,7 @@
         </div>
 
         <div class="tab-pane" id="reportcards">
-          
+          <span class="pull-right"><a href="{% url 'event_report_card_admin_view_pdf' event=event.pk %}">Download pdf</a></span>
           <table class="table table-striped">
             <tr><th>Player</th><th style="text-align: center;">Had fun?</th><th style="text-align: center;">Will Return?</th><th style="text-align: center;">Overall</th></tr>
             {% for reg in reportcards %}{% if not reg.user.is_superuser %}
