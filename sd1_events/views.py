@@ -191,7 +191,7 @@ def event_report_card_pdf(request, event):
     if not request.user.is_superuser:
         return HttpResponseForbidden('only admins can see this report.')
 
-    regs = event.eventregistration_set.all()
+    regs = event.eventregistration_set.all().order_by('user__first_name', 'user__last_name')
     reportcards = ReportCard.objects.filter(reg__event=event, reg__reportcard_submitted=True)
     ratings = {}
 
