@@ -14,10 +14,11 @@ from django.template import RequestContext
 from django.contrib import messages
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Q
+from django.db.models import F, Q, Avg
+
 from django.utils.timezone import utc
 
-#import xhtml2pdf.pisa as xhtml2pdf
+import xhtml2pdf.pisa as xhtml2pdf
 import stripe
 
 from sd1_events.models import *
@@ -180,10 +181,28 @@ def event_report_card_admin_view(request, event, pk):
 
 def event_report_card_pdf(request, event):
     event = get_object_or_404(EventInfo, pk=event)
+    regs = event.eventregistration_set.all()
+    reportcards = ReportCard.objects.filter(reg__event=event, reg__reportcard_submitted=True)
+    ratings = {}
+
+    perc_returned = ( reportcards.count() * 1.0 / regs.exclude(option__npc=True).count() ) * 100
+
+    ratings['returned'] = {'yes':perc_returned, 'no': 100 - perc_returned }
+
+
+    ratings['enjoy_yourself'] = {'yes':( reportcards.filter(enjoy_yourself=True).count() * 1.0 / reportcards.count() * 1.0 ) * 100,
+                                    'no':( reportcards.filter(enjoy_yourself=False).count() * 1.0 / reportcards.count() * 1.0 ) * 100 }
+
+    ratings['likely_to_return'] = {'yes':( reportcards.filter(likely_to_return=True).count() * 1.0 / reportcards.count() * 1.0 ) * 100,
+                                    'no':( reportcards.filter(likely_to_return=False).count() * 1.0 / reportcards.count() * 1.0 ) * 100 }
+
+    ratings['overall'] = reportcards.annotate(avg=Avg('overall'))[0].avg
 
     outfile = StringIO.StringIO()
-    html = render_to_string('events/admin/events_report_card_pdf.html', {'event': event, }, context_instance=RequestContext(request))
-    pdf = xhtml2pdf.CreatePDF('',outfile)
+    html = render_to_string('events/admin/events_report_card_pdf.html', {'event': event, 'regs': regs, 'ratings': ratings, }, context_instance=RequestContext(request))
+
+    pdf = xhtml2pdf.CreatePDF(html,outfile, path=settings.STATIC_ROOT, show_error_as_pdf=True)
 
 
-    return HttpResponse('')
+    return HttpResponse(outfile.getvalue(), mimetype='application/pdf')
+

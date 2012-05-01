@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Report cards for {{ site.name }} - {{ event }}</title>
+{% load url from future %}
+        {% load markup %}
+
+<style>
+@page {
+    size: letter portrait;
+    margin: 36pt;
+}
+
+@font-face {
+    font-family: 'SecondDawnLogoType';
+    src: url('http://{{site.domain}}/static/css/dirty_ego/dirtyego-webfont.ttf');
+}
+
+body {
+    font-size: 10pt;
+    font-family: Arial;
+
+}
+
+
+h1 { font-size: 52px; }
+h2 { font-size: 36px; }
+h3 { font-size: 28px; }
+
+h1, h2, h3 {
+  font-family: SecondDawnLogoType;
+  font-weight: normal;
+  line-height: 1.2em;
+  margin: 0px 1em 0px 0px;
+  display: inline-block;
+}
+
+.ctrl-grp label {
+  display: inline-block;
+  width: 360px;
+  margin-right: 12px;
+}
+
+.ctrl-grp {
+  margin: 0px -12px;
+}
+
+.ctrl-grp:hover {
+  background-color: #EEE;
+}
+
+textarea {
+  width: 600px;
+  height: 10em;
+  margin: 12px 0px 24px;
+
+}
+
+td { padding: 2pt 12pt;}
+th { padding: 2pt 0;}
+.ratings td { width: 96pt; }
+
+.char-name {
+  -pdf-outline: true;
+  -pdf-level: 0;
+  -pdf-open: false;
+}
+
+.question { 
+    font-weight: bold;
+    -pdf-keep-with-next: true;
+}
+</style>
+</head>
+<body>
+
+<div id="cover-page">
+<h1>Report cards for {{ event }}</h1>
+
+    <table>
+        <tr>
+            <th>Percent report cards returned:</th><td></td><td>{{ ratings.returned.yes|floatformat }}%</td></tr>
+        </tr>
+        <tr></tr>
+        <tr>
+            <th rowspan="2" valign=top>Did you enjoy yourself?</th><td>Yes</td><td>{{ ratings.enjoy_yourself.yes|floatformat }}%</td></tr>
+        <tr>                                            <td>No</td> <td>{{ ratings.enjoy_yourself.no|floatformat }}%</td></tr>
+        <tr></tr>
+        <tr>
+            <th rowspan="2" valign=top>Are you likely to return?</th><td>Yes</td><td>{{ ratings.likely_to_return.yes|floatformat }}%</td></tr>
+        <tr>                                                         <td>No</td> <td>{{ ratings.likely_to_return.no|floatformat }}%</td></tr>
+        <tr></tr>
+        <tr>
+            <th>Overall Average:</th><td></td><td>{{ ratings.overall|floatformat }} out of 5</td></tr>
+    </table>
+
+
+</div>
+{% for reg in regs %}{% if reg.reportcard_submitted %}{% with reg.reportcard as card %}
+<div style="-pdf-page-break: before;" class="card"> 
+    <div class="header">
+      <h1>Second Dawn</h1>&nbsp;&nbsp;&nbsp;<h3>Report Card for {{ reg.event }}</h3><br>
+      <div class="char-name">{{ reg.user.first_name }} {{ reg.user.last_name }}&nbsp;&nbsp;( <a href="mailto:{{ reg.user.email }}">{{ reg.user.email }}</a> )</div>
+      {% if reg.char %}<div>Played <a href="{% url 'condenser_char_view' slug=reg.char.slug %}">{{ reg.char }}</a></div>{% endif %}
+    </div>
+    <br>
+    <div class="body">
+        <table class="ratings">
+            <tr>
+              <th align=right width="40%">Did you enjoy yourself?</th>
+              <td>{% if card.enjoy_yourself %}Yes{% else %}No{% endif %}</td>
+              <th width="40%"></th>
+              <td>
+            </tr>
+            <tr>
+              <th align=right>Are you likely to return?</th>
+              <td>{% if card.likely_to_return %}Yes{% else %}No{% endif %}</td>
+                <th></th>
+                <td></td>
+            </tr>
+            <tr>
+                <th colspan="4" align=center>Please rate the following on a scale of 1-5&nbsp;&nbsp;&nbsp;&nbsp;(5 being great, and 1 being horrible)</th>
+            </tr>
+            <tr>
+                <th align=right>How were the rules?</th>
+                <td>{{ card.rules }}</td>
+                <th align=right>How was the food?</th>
+                <td>{{ card.food }}</td>
+            </tr>
+            <tr>
+                <th align=right>Were the puzzles good?</th>
+                <td>{{ card.puzzles }}</td>
+                <th align=right>Did the staff do a good job on RP?</th>
+                <td>{{ card.role_playing }}</td>
+            </tr>
+            <tr>
+                <th align=right>Did we do a good job on costuming and props?</th>
+                <td>{{ card.costumes }}</td>
+                <th align=right>What would you rate the event overall?</th>
+                <td>{{ card.overall }}</td>
+            </tr>
+        </table>
+        
+        <div>
+          <p class="question">Did anyone particularly help or hurt your immersive experience?</p>
+          <div>{{ card.anyone_help|markdown }}</div>
+        </div>
+
+        <div>
+          <p class="question">What kind of plots would you like to see in the future?</p>
+          <div>{{ card.plots|markdown }}</div>
+        </div>
+
+        <div>
+          <p class="question">Could you give us a brief list goals your character achieved, of just major events for your character?</p>
+          <div>{{ card.goals|markdown }}</div>
+        </div>
+
+        <div>
+          <p class="question">Any thing else you'd like to tell us?</p>
+          <div>{{ card.comments|markdown }}</div>
+        </div>
+        
+      </form>
+
+    </div>
+
+
+</div>
+{% endwith %}{% endif %}{% endfor %}
+</body>
+</html>
