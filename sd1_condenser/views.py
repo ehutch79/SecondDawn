@@ -70,7 +70,9 @@ def character_create(request):
             char = Character()
             char.name = form.cleaned_data['name']
             char.user = request.user
+
             if request.user.is_superuser or request.user.is_staff:
+                char.free_build = 999
                 char.is_new = False
                 char.is_npc = True
             char.save()
