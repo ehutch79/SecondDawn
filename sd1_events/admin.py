@@ -8,6 +8,12 @@ def fix_regs_missing_chars(modeladmin, request, queryset):
                 reg.char = reg.user.personalprofile.get_current_char()
                 reg.save()
 
+def fix_regs_missing_eeps(modeladmin, request, queryset):
+    for event in queryset:
+        for reg in event.eventregistration_set.all():
+            if not reg.eeps:
+                reg.eeps = 300
+                reg.save()
 
 class EventOptionsAdmin(admin.TabularInline):
     model = RegistrationOptions
@@ -34,7 +40,7 @@ class EventRegistrationAdmin(admin.TabularInline):
 class EventAdmin(admin.ModelAdmin):
     inlines = [ EventOptionsAdmin, EventRegistrationAdmin, ]
     list_display = ('__unicode__', 'total_regs')
-    actions = [fix_regs_missing_chars]
+    actions = [fix_regs_missing_chars, fix_regs_missing_eeps, ]
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline

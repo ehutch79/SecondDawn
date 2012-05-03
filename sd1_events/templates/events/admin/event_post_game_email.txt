@@ -1,0 +1,10 @@
+Hey there {{ reg.user.first_name }} {{ reg.user.last_name }},
+
+We've started sifting through all the post game paperwork, and we've started rewarding post game epps. So you can go ahead and buy some build for your character.
+
+{% if not reg.reportcard_submitted %}We'd also like to hear from you on how we did. If you fill out the report card linked below you'll also get a bonus BGA!
+
+{% load url from future %}http://{{ site.domain }}{% url 'event_report_card' pk=event.pk %}
+{% endif %}
+Thanks!
+Second Dawn Staff

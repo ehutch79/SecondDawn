@@ -63,7 +63,7 @@ class EventRegistration(models.Model):
     amount_paid = models.DecimalField(default=0.00, decimal_places=2, max_digits=10)
 
     attended = models.BooleanField(default=False)
-    eeps = models.IntegerField(default=0)
+    eeps = models.IntegerField(default=300)
     
     reportcard_submitted = models.BooleanField(default=False)
 
@@ -71,7 +71,7 @@ class EventRegistration(models.Model):
         return '{fname} {lname} ({email}) attending {event}'.format(fname=self.user.first_name, lname=self.user.last_name, email=self.user.email, event=self.event)
 
     class Meta:
-        ordering = ['event__event_start']
+        ordering = ['event__event_start', 'user__first_name', ]
         verbose_name = "Player Registration"
         verbose_name_plural = "Player Registrations"
 
