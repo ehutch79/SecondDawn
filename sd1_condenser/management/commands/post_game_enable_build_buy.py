@@ -48,7 +48,9 @@ class Command(BaseCommand):
 
             message = render_to_string('events/admin/event_post_game_email.txt', {'event': event, 'reg': reg, 'site':current_site, })
 
-            send_mail('Second Dawn - {event} report card'.format(event=str(event)), 
+            if not reg.admin_hold:
+
+                send_mail('Second Dawn - {event} report card'.format(event=str(event)), 
                     message,
                     settings.EMAIL_FROM,
                     [reg.user.email], fail_silently=False)
