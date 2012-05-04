@@ -401,7 +401,7 @@ def char_buy_build(request, slug):
     #return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': chars[0].slug}))
 
 
-
+@login_required
 def player_upcoming_events(request, slug):
     player = get_object_or_404(User, username=slug)
 
