@@ -22,6 +22,8 @@ import xhtml2pdf.pisa as xhtml2pdf
 import stripe
 
 from sd1_events.models import *
+from sd1_condenser.models import *
+
 
 import logging
 
@@ -131,6 +133,37 @@ def event_admin_view(request, pk):
     crunchies = event.eventregistration_set.filter(option__npc=True)
     reportcards = event.eventregistration_set.filter(reportcard_submitted=True).order_by('reportcard__submitted', 'user__first_name')
 
+    factions = []
+    faction_list = Faction.objects.all()
+    for faction in faction_list:
+        charsforfaction = FactionStatus.objects.filter(member=True,faction=faction).values_list('char', flat=True)
+        
+
+        factions.append({'name': faction.name,
+         'count': regs.filter(char__in=charsforfaction).count(),
+         'new': regs.filter(char__in=charsforfaction).filter(new_char=True).count(),
+         })
+
+    headers = []
+    header_list = Header.objects.all()
+    for header in header_list:
+        charsforheader = header.character_set.all()
+        
+
+        headers.append({'name': header.name,
+         'count': regs.filter(char__in=charsforheader).count(),
+         })
+
+    professions = []
+    profession_list = Profession.objects.all()
+    for profession in profession_list:
+        charsforprof = ProfessionBought.objects.filter(profession=profession).values_list('char', flat=True)
+        
+
+        professions.append({'name': profession.name,
+         'count': regs.filter(char__in=charsforprof).count(),
+         })
+
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
     return render_to_response('events/admin/events_view.html', 
                             {'event': event, 
@@ -138,7 +171,9 @@ def event_admin_view(request, pk):
                             'regs': regs,
                             'crunchies': crunchies,
                             'reportcards': reportcards,
-
+                            'factions':factions,
+                            'headers': headers,
+                            'professions': professions,
                              }, 
                             context_instance=RequestContext(request))
 

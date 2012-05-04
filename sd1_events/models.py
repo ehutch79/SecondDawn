@@ -55,6 +55,7 @@ class EventRegistration(models.Model):
     id = UUIDField(version=4, primary_key=True)
     user = models.ForeignKey(User, db_index=True)
     char = models.ForeignKey(Character, null=True, blank=True, help_text="Character played at event")
+    new_char = models.BooleanField(default=False)
     event = models.ForeignKey(EventInfo, db_index=True)
     option = models.ForeignKey(RegistrationOptions, db_index=True)
 
