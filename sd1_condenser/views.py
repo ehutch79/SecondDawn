@@ -445,7 +445,7 @@ def player_upcoming_events(request, slug):
             reg = EventRegistration()
             reg.user = player
             reg.char = player.personalprofile.get_current_char()
-            if reg.char.is_new:
+            if not reg.char or reg.char.is_new:
                 reg.new_char = True
             reg.event = event
 
