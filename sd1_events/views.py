@@ -27,13 +27,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+@login_required
 def event_list(request):
     events = EventInfo.objects.all()
     reged_events = EventRegistration.objects.filter(user=request.user).values_list('event__pk',flat=True)
 
     return render_to_response('events/events_list.html', {'events': events, 'reged_events': reged_events}, context_instance=RequestContext(request))
 
+@login_required
 def register_for_events(request):
     if request.method != 'POST':
         return HttpResponseForbidden('Method not allowed')
@@ -102,11 +103,13 @@ def register_for_events(request):
 
     return HttpResponseRedirect(reverse('event_registration_complete', kwargs={'pk': receipt.pk}))
 
+@login_required
 def event_reg_complete(request, pk=None):
     receipt = get_object_or_404(Receipt, pk=pk)
 
     return render_to_response('events/events_reg_complete.html', {'receipt': receipt}, context_instance=RequestContext(request))
 
+@login_required
 def event_admin_list(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden('')
@@ -117,6 +120,7 @@ def event_admin_list(request):
                             {'events': events, 'today':datetime.date(now.year, now.month, now.day) }, 
                             context_instance=RequestContext(request))
 
+@login_required
 def event_admin_view(request, pk):
     event = get_object_or_404(EventInfo, pk=pk)
 
@@ -139,6 +143,7 @@ def event_admin_view(request, pk):
                             context_instance=RequestContext(request))
 
 
+@login_required
 def event_report_card(request, pk):
     reg = get_object_or_404(EventRegistration, pk=pk)
     (card, created) = ReportCard.objects.get_or_create(reg=reg)
@@ -175,7 +180,7 @@ def event_report_card(request, pk):
 
     return render_to_response('events/events_report_card_complete.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
 
-
+@login_required
 def event_report_card_admin_view(request, event, pk):
     if not request.user.is_superuser:
         return HttpResponseForbidden('only admins can see this report.')
@@ -185,6 +190,7 @@ def event_report_card_admin_view(request, event, pk):
 
     return render_to_response('events/admin/events_report_card.html', {'reg': reg, 'card': card}, context_instance=RequestContext(request))
 
+@login_required
 def event_report_card_pdf(request, event):
     event = get_object_or_404(EventInfo, pk=event)
 
