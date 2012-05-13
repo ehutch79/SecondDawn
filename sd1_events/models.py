@@ -42,6 +42,8 @@ class RegistrationOptions(models.Model):
 
     npc = models.BooleanField(default=False)
 
+    assignments = models.IntegerField(default=1, help_text="the number of slots a player can stay in. ie. the number of cabins")
+
     def __unicode__(self):
         return self.name
 
@@ -68,6 +70,8 @@ class EventRegistration(models.Model):
     
     reportcard_submitted = models.BooleanField(default=False)
     admin_hold = models.BooleanField(default=False)
+
+    cabin_num = models.IntegerField(default=0)
 
     def __unicode__(self):
         return '{fname} {lname} ({email}) attending {event}'.format(fname=self.user.first_name, lname=self.user.last_name, email=self.user.email, event=self.event)

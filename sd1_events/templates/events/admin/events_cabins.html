@@ -1,0 +1,89 @@
+{% extends 'events/base.html' %}
+
+{% load url from future %}
+
+{% block title %}{{ event }}{% endblock %}
+
+{% block contents %}
+<div class="span12">
+  <ul class="breadcrumb">
+    <li>
+      <a href="{% url 'event_admin_view' pk=event.pk %}">{{ event }}</a> <span class="divider">/</span>
+    </li>
+    <li>
+      <a href="{% url 'event_cabins' event=event.pk %}">Cabin assignment</a> <span class="divider">/</span>
+    </li>
+  </ul>
+</div>
+
+<div class="span12">
+    <div class="pull-right btn btn-primary" id="save">Save</div>
+  </div>
+  
+
+<div class="span12">
+  {% for reg in regs %}
+  {% if reg.option.assignments > 1 %}
+  {% for slot in reg.slots %}
+  <div class="cabin-box{% if forloop.counter0 == 0 %} players{% endif %}" {% if forloop.counter0 %}data-cabin-pk="{{ reg.option.pk }}" data-cabin-num="{{ forloop.counter0 }}"{% endif %}>
+    {% if forloop.counter0 == 0 %}
+    <h4>Unassigned ( {{reg.option.name}} )</h4>
+    {% else %}
+    <h4>{{ reg.option.name }} {{ forloop.counter0 }}</h4>{% endif %}
+    <ul id="{{ reg.option.name }}{{ forloop.counter0 }}" data-cabin-number="{{ forloop.counter0 }}" class="{{ reg.option.name }}">
+    {% for player_reg in slot.players %}
+      <li data-reg-pk="{{ player_reg.pk }}">{{ player_reg.user.first_name }} {{ player_reg.user.last_name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}  
+  {% endif %}
+  {% endfor %}
+
+</div>
+
+{% endblock %}
+
+{% block extra-body-js %}
+  <script type="text/javascript">
+    $(function () {
+  
+      {% for reg in regs %}{% if reg.option.assignments > 1 %}
+        $( "{% for slot in reg.slots %}{% if not forloop.first %}, {% endif %}#{{ reg.option.name }}{{ forloop.counter0 }}{% endfor %}" ).sortable({
+          connectWith: ".{{ reg.option.name }}",
+          placeholder: "ui-state-highlight"
+        }).disableSelection();
+      {% endif %}{% endfor %}
+
+      $('#save.btn').click(function(e) {
+        $target = $(e.target);
+        if( $target.hasClass('disabled')) { return false; }
+        $target.addClass('disabled');
+        
+        $assignments = [];
+        $('.cabin-box').each(function(idx, val) { 
+          $cabin_el = $(val);
+          $cabin_num = 0;
+          if($cabin_el.attr('data-cabin-num')) {
+            $cabin_num = $cabin_el.attr('data-cabin-num');
+          }
+          $players = $cabin_el.find('li');
+          $player_pks = [];
+          $players.each(function(idx, val) {
+            $player_pks.push($(val).attr('data-reg-pk'));
+          });
+          $assignments.push({'cabin_num': $cabin_num, 'players': $player_pks});
+        });
+
+        $.ajax("{% url 'event_cabins' event=event.pk %}", {
+          type: 'POST',
+          data: {assignments: JSON.stringify($assignments)},
+          success: function(data) {
+            $target.removeClass('disabled');
+          }
+        });
+      });
+
+    });
+  </script>
+{% endblock %}

@@ -5,7 +5,19 @@
 {% block title %}{{ event }}{% endblock %}
 
 {% block contents %}
-<div class="span12"><h1>{{ event }}</h1><br></div>
+<div class="span12">
+  <h1>{{ event }}</h1><br>
+    <ul class="breadcrumb">
+    <li>
+      <a href="{% url 'event_admin_view' pk=event.pk %}">{{ event }}</a> <span class="divider">/</span>
+    </li>
+    <li>
+      <a href="{% url 'event_cabins' event=event.pk %}">Cabin assignment</a> <span class="divider">/</span>
+    </li>
+    
+  </ul>
+
+</div>
 <div class="span6">
 
     <ul class="nav nav-tabs">
@@ -18,13 +30,14 @@
         <div class="tab-pane active" id="regs">
           
           <table class="table table-striped">
-            <tr><th>Player</th><th>Character</th><th></th></tr>
+            <tr><th>Player</th><th>Character</th><th>Cabin</th><th></th></tr>
             {% for reg in regs %}{% if not reg.user.is_superuser %}
-              {% ifchanged %}<tr><th colspan="3">{{ reg.option.name }}</th></tr>{% endifchanged %}
+              {% ifchanged %}<tr><th colspan="4">{{ reg.option.name }}</th></tr>{% endifchanged %}
               <tr>
                 {% with reg.user.personalprofile.get_current_char as char %}
                 <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
                 <td>{% if char %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a>{% endif %}</td>
+                <td>{% if reg.option.assignments > 1 %}{% if reg.cabin_num %}{{ reg.cabin_num }}{% endif %}{% endif %}</td>
                 <td>{% if reg.attended %}<span class="label">Checked in</span>{% endif %}</td>
                 {% endwith %}
               </tr>

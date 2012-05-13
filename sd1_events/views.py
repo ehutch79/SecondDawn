@@ -16,6 +16,8 @@ from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q, Avg
 
+
+
 from django.utils.timezone import utc
 
 import xhtml2pdf.pisa as xhtml2pdf
@@ -176,6 +178,39 @@ def event_admin_view(request, pk):
                             'professions': professions,
                              }, 
                             context_instance=RequestContext(request))
+
+
+@login_required
+def event_cabins(request, event):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
+    event = get_object_or_404(EventInfo, pk=event)
+
+    if request.method == 'GET':
+        regs = []
+
+        options = event.registrationoptions_set.all()
+        for option in options:
+            eventregs = event.eventregistration_set.filter(option=option)
+            slots=[]
+            for x in range(0,option.assignments+1):
+                slots.append({'num': x, 'players': eventregs.filter(cabin_num=x)})
+            regs.append({'option': option,
+                            'slots': slots })
+
+
+        return render_to_response('events/admin/events_cabins.html', 
+                                {'event': event,
+                                 'regs': regs },
+                                context_instance=RequestContext(request))
+
+    assignments = json.loads(request.POST['assignments'])
+    for assign in assignments:
+        for reg in assign['players']:
+            event.eventregistration_set.filter(pk=reg).update(cabin_num=assign['cabin_num'])
+
+    return HttpResponse('')
 
 
 @login_required

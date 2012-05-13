@@ -129,6 +129,35 @@ class Profession(models.Model):
         return self.bought_by.aggregate(max_score=Max('score'))
 
 
+class ProfSkill(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    name = models.CharField(max_length=255, unique=True)
+    slug = AutoSlugField(populate_from='name', overwrite=True)
+    playable = models.BooleanField(default=True, help_text="Is this available for players to buy?")
+
+    components = models.BooleanField(default=False, help_text="Requires components")
+
+    description = models.TextField()
+
+    cost = models.IntegerField(default=0)
+    incr_cost = models.IntegerField(default=0)
+    variable_cost = models.BooleanField(default=False, help_text="cost to buy can vary")
+
+    rank = models.IntegerField(default=1)
+
+    profession = models.ManyToManyField(Profession, blank=True, null=True,
+                                     help_text="if blank, no req. If multiple, any will qualify")
+    
+    required_skills = models.ManyToManyField('self', symmetrical=False, related_name="dependant_skills", blank=True,
+                                             null=True, help_text="if blank then none. if multiple, all req to learn")
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['rank', 'name',]
+
+
 class Skill(models.Model):
     id = UUIDField(version=4, primary_key=True)
     name = models.CharField(max_length=255, unique=True)
@@ -154,6 +183,7 @@ class Skill(models.Model):
 
     class Meta:
         ordering = ['name']
+
 
 class Feat(models.Model):
     id = UUIDField(version=4, primary_key=True)
