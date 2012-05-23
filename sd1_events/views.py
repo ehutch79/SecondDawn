@@ -181,6 +181,21 @@ def event_admin_view(request, pk):
 
 
 @login_required
+def event_new_players(request, event):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
+    event = get_object_or_404(EventInfo, pk=event)
+    regs = event.eventregistration_set.filter(char__is_new=True).exclude(option__npc=True)
+
+    return render_to_response('events/admin/events_new_players.html', 
+                            {'event': event, 
+                            'regs':regs,
+                             }, 
+                            context_instance=RequestContext(request))
+
+
+@login_required
 def event_cabins(request, event):
     if not request.user.is_superuser:
         return HttpResponseForbidden('only admins can see this report.')
