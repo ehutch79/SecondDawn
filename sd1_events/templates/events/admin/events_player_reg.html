@@ -1,0 +1,50 @@
+{% extends 'events/base.html' %}
+
+{% load url from future %}
+
+{% block title %}{{ event }}{% endblock %}
+
+{% block contents %}
+<div class="span12">
+  <h1>{{ event }}</h1><br>
+  <ul class="breadcrumb">
+    <li>
+      <a href="{% url 'event_admin_view' pk=event.pk %}">{{ event }}</a> <span class="divider">/</span>
+    </li>
+    <li>
+      <a href="{% url 'event_cabins' event=event.pk %}">Cabin assignment</a> <span class="divider">/</span>
+    </li>
+    <li>
+      <a href="{% url 'event_new_players' event=event.pk %}">New Players</a> <span class="divider">/</span>
+    </li>
+
+
+    <li>
+      <a href="{% url 'event_player' event=event.pk reg=reg.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name }}</a> <span class="divider"></span>
+    </li>
+
+  </ul>
+</div>
+
+<div class="span12">
+  <table class="table">
+    <tr>
+      <td>{{ reg.option }} {{ reg.cabin_num }}</td>
+      <td><input type="checkbox" value="1" {% if reg.paid %}checked="checked"{% endif %} name="paid"> Paid</td>
+      <td><input type="checkbox" value="1" {% if reg.attended %}checked="checked"{% endif %} name="attended"> Attended</td>
+      <td><div class="btn btn-primary pull-right">Save</div>
+    </tr>
+  </table>
+
+</div>
+
+{% endblock %}
+
+{% block extra-body-js %}
+  <script type="text/javascript">
+    $(function () {
+  
+     
+    });
+  </script>
+{% endblock %}

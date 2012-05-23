@@ -1,0 +1,42 @@
+<div class="char-sheet">
+    <div class="char-name">{{ char.name }}</div>
+    <div class="player-name"><label>Played by:</label> {{ char.user.first_name }} {{ char.user.last_name}}</div>
+
+    <div class="left column">
+
+        <div class="stats">
+            <table class="table striped">
+                <tr>
+                    <td>Blood</td>
+                    <td>Might</td>
+                    <td>Mind</td>
+                    <td>Finesse</td>
+                    <td>Will</td>
+                </tr>
+                <tr>
+                    <td>{{ char.blood }}</td>
+                    <td>{{ char.might }}</td>
+                    <td>{{ char.mind }}</td>
+                    <td>{{ char.finesse }}</td>
+                    <td>{{ char.will }}</td>
+                </tr>
+            </table>
+        </div>
+    
+        <div class="skills">
+            <table>
+                <tr>
+                    <th>Skill</th><th>Activation</th>
+                    {% for skill in char.skills.all %}
+                    <td>{{ skill.skill.name }}</td><td>{{ skill.skill.activation }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+
+
+
+</div>

@@ -189,7 +189,9 @@ def character_adjust_attributes(request, slug):
                     buy.bundled_from = skill
                     buy.save()
                     has_list.append(granted.pk)
-        
+    
+    if not char.is_npc:
+        char.is_updated = True
     char.save()
 
     profession_list = dict([(k[-37:-1], v) for k, v in request.POST.items() if k[:11] == 'professions'])

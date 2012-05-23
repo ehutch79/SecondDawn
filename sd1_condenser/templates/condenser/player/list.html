@@ -30,7 +30,7 @@
 				<td class="eeps">{{ player.eepsbank.eeps }}
 				{% with player.personalprofile.get_current_char as char %}
 				<td>{% if not player.is_staff and not player.is_superuser %}
-						{% if char.slug %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a> 
+						{% if char.slug %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a> {% if char.is_updated %}<span class="label label-warning">Updated</span>{% endif %}
 						{% if player.personalprofile.get_prev_char.count %}
 						<span class="dropdown"  id="{{ player.username }}-chars"><a data-target="#{{ player.username }}-chars" class="dropdown-toggle" data-toggle="dropdown" href="#">
 						    <span class="caret"></span>

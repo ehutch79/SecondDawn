@@ -37,7 +37,7 @@
               {% ifchanged %}<tr><th colspan="4">{{ reg.option.name }}</th></tr>{% endifchanged %}
               <tr>
                 {% with reg.user.personalprofile.get_current_char as char %}
-                <td><a href="{% url 'event_admin_view' pk=event.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
+                <td><a href="{% url 'event_player' event=event.pk reg=reg.pk %}">{{ reg.user.first_name }} {{ reg.user.last_name}}</a></td>
                 <td>{% if char %}<a href="{% url 'condenser_char_view' slug=char.slug %}">{{ char }}</a>{% endif %}</td>
                 <td>{% if reg.option.assignments > 1 %}{% if reg.cabin_num %}{{ reg.cabin_num }}{% endif %}{% endif %}</td>
                 <td>{% if reg.attended %}<span class="label">Checked in</span>{% endif %}</td>

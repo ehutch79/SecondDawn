@@ -229,6 +229,35 @@ def event_cabins(request, event):
 
 
 @login_required
+def event_player(request, event, reg):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins can see this report.')
+
+    event = get_object_or_404(EventInfo, pk=event)
+    reg = get_object_or_404(EventRegistration, pk=reg)
+
+    if request.method == 'POST':
+        if request.POST['attended'] == '1':
+            EventRegistration.objects.filter(pk=reg.pk).update(attended=True)
+        else:
+            EventRegistration.objects.filter(pk=reg.pk).update(attended=False)
+
+        if request.POST['paid'] == '1':
+            EventRegistration.objects.filter(pk=reg.pk).update(paid=True)
+        else:
+            EventRegistration.objects.filter(pk=reg.pk).update(paid=False)
+
+
+
+    return render_to_response('events/admin/events_player_reg.html', 
+                            {'event': event, 
+                            'reg':reg,
+                             }, 
+                            context_instance=RequestContext(request))
+
+
+
+@login_required
 def event_report_card(request, pk):
     reg = get_object_or_404(EventRegistration, pk=pk)
     (card, created) = ReportCard.objects.get_or_create(reg=reg)

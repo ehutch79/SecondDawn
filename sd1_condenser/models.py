@@ -129,34 +129,6 @@ class Profession(models.Model):
         return self.bought_by.aggregate(max_score=Max('score'))
 
 
-class ProfSkill(models.Model):
-    id = UUIDField(version=4, primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
-    slug = AutoSlugField(populate_from='name', overwrite=True)
-    playable = models.BooleanField(default=True, help_text="Is this available for players to buy?")
-
-    components = models.BooleanField(default=False, help_text="Requires components")
-
-    description = models.TextField()
-
-    cost = models.IntegerField(default=0)
-    incr_cost = models.IntegerField(default=0)
-    variable_cost = models.BooleanField(default=False, help_text="cost to buy can vary")
-
-    rank = models.IntegerField(default=1)
-
-    profession = models.ManyToManyField(Profession, blank=True, null=True,
-                                     help_text="if blank, no req. If multiple, any will qualify")
-    
-    required_skills = models.ManyToManyField('self', symmetrical=False, related_name="dependant_skills", blank=True,
-                                             null=True, help_text="if blank then none. if multiple, all req to learn")
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        ordering = ['rank', 'name',]
-
 
 class Skill(models.Model):
     id = UUIDField(version=4, primary_key=True)
@@ -214,6 +186,7 @@ class Character(models.Model):
     is_deceased = models.BooleanField(default=False)
 
     is_new = models.BooleanField(default=True)
+    is_updated = models.BooleanField(default=False)
 
     can_buy_build = models.BooleanField(default=True)
 
@@ -353,6 +326,82 @@ class ProfessionBought(models.Model):
 
     class Meta:
         verbose_name_plural = "Professions Bought"
+
+
+class ProfSkill(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    name = models.CharField(max_length=255, unique=True)
+    slug = AutoSlugField(populate_from='name', overwrite=True)
+    playable = models.BooleanField(default=True, help_text="Is this available for players to buy?")
+
+    components = models.BooleanField(default=False, help_text="Requires components")
+
+    description = models.TextField()
+    requires_novel = models.BooleanField(default=False, help_text="Does the player need to type a novel to use")
+
+    cost = models.IntegerField(default=0)
+    incr_cost = models.IntegerField(default=0)
+    variable_cost = models.BooleanField(default=False, help_text="cost to buy can vary")
+
+    rank = models.IntegerField(default=1)
+
+    profession = models.ManyToManyField(Profession)
+    
+    required_skills = models.ManyToManyField('self', symmetrical=False, related_name="dependant_skills", blank=True,
+                                             null=True, help_text="if blank then none. if multiple, all req to learn")
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['rank', 'name',]
+
+
+class ProfSkillLearned(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+
+    char = models.ForeignKey(Character, related_name="profession_skills")
+    skill = models.ForeignKey(ProfSkill)
+
+    pp_paid = models.IntegerField(default=0)
+    specifics = models.CharField(max_length=255, blank=True, null=True)
+
+    novel = models.TextField(null=True, blank=True)
+
+
+class BGAction(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    user = models.ForeignKey(User, db_index=True, editable=True, blank=True, null=True)
+    
+    event = models.ForeignKey('sd1_events.EventInfo', db_index=True, editable=True, blank=True, null=True)
+    is_ingame = models.BooleanField(default=False)
+
+    action = models.CharField(max_length=255)
+
+    profession = models.ForeignKey(ProfessionBought, db_index=True, editable=True, blank=True, null=True)
+
+    details = models.TextField(blank=True, null=True)
+
+    pending = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+
+
+class ProfessionAction(models.Model):
+    id = UUIDField(version=4, primary_key=True)
+    bga = models.ForeignKey(BGAction, db_index=True, editable=True, blank=True, null=True)
+    
+    use = models.BooleanField(default=False)
+    learn = models.BooleanField(default=False)
+    pp_spent = models.IntegerField(default=0)
+    partial_spend = models.BooleanField(default=False)
+    
+    prof_skill = models.ForeignKey(ProfSkill, blank=True, null=True)
+
+    specifics = models.TextField(blank=True, null=True)
+
+    novel = models.TextField(null=True, blank=True)
+
+
 
 @receiver(post_save, sender=User)
 def make_profiles(sender, **kwargs):

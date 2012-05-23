@@ -27,6 +27,7 @@ class Command(BaseCommand):
             if reg.char:
                 reg.char.can_buy_build = True
                 reg.char.is_new = False
+                reg.char.is_updated = False
                 reg.char.save()
 
                 try:
