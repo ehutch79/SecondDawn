@@ -21,29 +21,28 @@
 </div>
 
 <div class="span12">
-    <div class="pull-right btn btn-primary" id="save">Save</div>
-  </div>
-  
-
-<div class="span12">
+  <table class="table table-striped">
+    <tr>
+      <th>Player Name</th>
+      <th>Character</th>
+      <th>Headers</th>
+      <th>Factions</th>
+      <th>Professions</th>
+    </tr>
   {% for reg in regs %}
-  {% if reg.option.assignments > 1 %}
-  {% for slot in reg.slots %}
-  <div class="cabin-box{% if forloop.counter0 == 0 %} players{% endif %}" {% if forloop.counter0 %}data-cabin-pk="{{ reg.option.pk }}" data-cabin-num="{{ forloop.counter0 }}"{% endif %}>
-    {% if forloop.counter0 == 0 %}
-    <h4>Unassigned ( {{reg.option.name}} )</h4>
-    {% else %}
-    <h4>{{ reg.option.name }} {{ forloop.counter0 }}</h4>{% endif %}
-    <ul id="{{ reg.option.name }}{{ forloop.counter0 }}" data-cabin-number="{{ forloop.counter0 }}" class="{{ reg.option.name }}">
-    {% for player_reg in slot.players %}
-      <li data-reg-pk="{{ player_reg.pk }}">{{ player_reg.user.first_name }} {{ player_reg.user.last_name }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endfor %}  
-  {% endif %}
+    <tr>
+      <td>{{ reg.user.first_name }} {{ reg.user.last_name }}</td>
+      <td><a href="{% url 'condenser_char_view' slug=reg.char.slug %}">{{ reg.char.name }}</a></td>
+      <td>{% for header in reg.char.headers.all %}{{ header }}{% endfor %}</td>
+      <td>{% for faction in reg.char.factions.all %}{{ faction }}{% endfor %}</td>
+      <td>{% for profession in reg.char.professions.all %}{{ profession.profession }}{% endfor %}</td>
+    </tr>
+    <tr>
+      <td style="text-align:right">Starting Gear:</td><td colspan="4">{% for faction in reg.char.factions.all %}{{ faction.faction.start_gear }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+    </tr>
   {% endfor %}
 
+  </table>
 </div>
 
 {% endblock %}
