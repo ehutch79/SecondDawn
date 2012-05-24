@@ -27,8 +27,9 @@ urlpatterns = patterns('',
     url(r'^char/view/(?P<slug>[-\w\d]+)/buy_build/$', 'sd1_condenser.views.char_buy_build', name='condenser_char_buy_build'),
     url(r'^char/view/(?P<slug>[-\w\d]+)/approve_bg/$', 'sd1_condenser.views.char_approve_bg', name='condenser_char_approve_bg'),
     
+    url(r'^char/view/(?P<slug>[-\w\d]+)/sheet/$', 'sd1_condenser.views.character_sheet', name='condenser_char_sheet'),
     url(r'^char/view/(?P<slug>[-\w\d]+)/$', 'sd1_condenser.views.character_view', name='condenser_char_view'),
-    
+    url(r'^char/sheets/(?P<event>[-\w\d]+)/$', 'sd1_condenser.views.character_sheet_pdf', name='condenser_char_sheets_pdf'),
 
     url(r'^char/delete/(?P<slug>[-\w\d]+)/$', 'sd1_condenser.views.char_delete', name='condenser_char_delete'),
 

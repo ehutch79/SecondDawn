@@ -1,17 +1,17 @@
 <div class="char-sheet">
-    <div class="char-name">{{ char.name }}</div>
-    <div class="player-name"><label>Played by:</label> {{ char.user.first_name }} {{ char.user.last_name}}</div>
-
-    <div class="left column">
-
+    <div class="char-name">{{ char.name }}</div><div class="build">Build Spent: {{ char.build_spent }}</div>
+    <div class="player-name">Played by: {{ char.user.first_name }} {{ char.user.last_name}}</div>
+<br>
+    <table class="body-table" ><tr>
+        <td  valign=top>
         <div class="stats">
-            <table class="table striped">
+            <table class="table attr-table">
                 <tr>
-                    <td>Blood</td>
-                    <td>Might</td>
-                    <td>Mind</td>
-                    <td>Finesse</td>
-                    <td>Will</td>
+                    <th>Blood</th>
+                    <th>Might</th>
+                    <th>Mind</th>
+                    <th>Finesse</th>
+                    <th>Will</th>
                 </tr>
                 <tr>
                     <td>{{ char.blood }}</td>
@@ -24,15 +24,66 @@
         </div>
     
         <div class="skills">
-            <table>
+            <table class="table table-striped skill-table">
                 <tr>
-                    <th>Skill</th><th>Activation</th>
-                    {% for skill in char.skills.all %}
-                    <td>{{ skill.skill.name }}</td><td>{{ skill.skill.activation }}</td>
-                    {% endfor %}
+                    <th width=60%>Skill</th><th>Activation</th>
                 </tr>
+
+                    {% for skill in char.skills.all %}
+                    <tr><td>{{ skill.skill.name }}</td><td>{{ skill.skill.activation }}</td></tr>
+                    {% endfor %}
+                
             </table>
         </div>
+        </td>
+        <td valign=top>
+
+            <table class="memb-table table striped">
+                <tr><th valign="top">Faction:</th><td>
+                    <ul>
+                        {% for faction in char.factions.all %}
+                        <li>{{ faction.faction }}</li>
+                        {% endfor %}
+                    </ul>
+                </td></tr>
+                <tr><th valign="top">Header:</th><td>
+                    <ul>
+                        {% for header in char.headers.all %}
+                        <li>{{ header }}</li>
+                        {% endfor %}
+                    </ul>
+                </td></tr>
+                <tr><th valign="top">Professions:</th><td>
+                    <ul>
+                        {% for profession in char.professions.all %}
+                        <li>{{ profession.profession }} ( {{ profession.score }} )</li>
+                        {% endfor %}
+                    </ul>
+                </td></tr>
+                </table>
+<br><br>
+                <table class="table striped">
+                    <tr><th>Prof. Action</th><th width="10%">PP</th></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+
+                    
+
+                </table>
+
+        </td>
+    </tr></table>
 
     </div>
 

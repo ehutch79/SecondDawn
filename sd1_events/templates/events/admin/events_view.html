@@ -32,6 +32,7 @@
         <div class="tab-pane active" id="regs">
           
           <table class="table table-striped">
+            <tr><td colspan="4">Download pdf of <a href="{% url 'condenser_char_sheets_pdf' event=event.pk %}">char. sheets</a></td>
             <tr><th>Player</th><th>Character</th><th>Cabin</th><th></th></tr>
             {% for reg in regs %}{% if not reg.user.is_superuser %}
               {% ifchanged %}<tr><th colspan="4">{{ reg.option.name }}</th></tr>{% endifchanged %}

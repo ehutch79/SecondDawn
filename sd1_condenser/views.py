@@ -1,5 +1,6 @@
 import math
 import datetime
+import StringIO
 
 from django.contrib.contenttypes.models import ContentType
 from django.views.decorators.cache import never_cache
@@ -14,6 +15,9 @@ from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.utils.timezone import utc
+
+import xhtml2pdf.pisa as xhtml2pdf
+
 
 from sd1_condenser.models import *
 from sd1_condenser.forms import CreateCharacterForm
@@ -51,6 +55,41 @@ def character_view(request, slug=None):
 
     return render_to_response(template_name, {'char': char, 'slug': slug}, context_instance=RequestContext(request))
 
+@login_required
+def character_sheet(request, slug=None):
+    template_name = 'condenser/char_sheet_fame.html'
+    
+    char = get_object_or_404(Character, slug=slug)
+
+    if not request.user.is_staff and not request.user.is_superuser and request.user != char.user:
+        return HttpResponseForbidden('You may only view your own character')
+
+    return render_to_response(template_name, {'char': char, 'slug': slug}, context_instance=RequestContext(request))
+
+
+
+@login_required
+def character_sheet_pdf(request, event):
+    template_name = 'condenser/char_sheet_multiple.html'
+    
+    event = get_object_or_404(EventInfo, pk=event)
+    chars = []
+#    chars = Character.objects.all().order_by('slug')
+    for reg in event.eventregistration_set.all().order_by('char__slug'):
+        if reg.char:
+            chars.append(reg.char)
+
+    if not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden('You may only view your own character')
+
+    return render_to_response(template_name, {'chars': chars }, context_instance=RequestContext(request))
+
+    outfile = StringIO.StringIO()
+    pdf = xhtml2pdf.CreatePDF(html,outfile, show_error_as_pdf=True)
+
+    response = HttpResponse(outfile.getvalue(), mimetype='application/pdf')
+    response['Content-Disposition'] = 'filename="Char Sheets for {eventname}.pdf'.format(eventname=str(event))
+    return response
 
 @login_required
 def character_create(request):
