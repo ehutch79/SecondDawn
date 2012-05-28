@@ -126,7 +126,7 @@ class Profession(models.Model):
         return self.bought_by.filter(char__is_npc=False,char__is_deceased=False,char__is_retired=False)
 
     def max_score(self):
-        return self.bought_by.aggregate(max_score=Max('score'))
+        return self.bought_by.exclude(char__is_npc=True).aggregate(max_score=Max('score'))
 
 
 
