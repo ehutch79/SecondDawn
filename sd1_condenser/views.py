@@ -254,7 +254,7 @@ def character_adjust_attributes(request, slug):
     for profession_id in profession_list:
         profession_score = int(profession_list[profession_id])
         num_profs = int(char.professions.all().count()+1)
-        if (profession_id not in has_list and num_profs < 4) or (request.user.is_superuser or request.user.is_staff):
+        if (profession_id not in has_list and (num_profs < 4 or request.user.is_superuser or request.user.is_staff):
             profession = Profession.objects.get(pk=profession_id)
             buy = ProfessionBought()
             buy.profession = profession
