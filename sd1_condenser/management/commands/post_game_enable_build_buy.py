@@ -48,7 +48,7 @@ class Command(BaseCommand):
             current_site = Site.objects.get(id=settings.SITE_ID)
 
             message = render_to_string('events/admin/event_post_game_email.txt', {'event': event, 'reg': reg, 'site':current_site, })
-
+            
             if not reg.admin_hold:
 
                 send_mail('Second Dawn - {event} report card'.format(event=str(event)), 
