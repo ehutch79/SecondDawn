@@ -46,6 +46,14 @@ class SkillResource(ModelResource):
     required_skills = fields.ToManyField('sd1_condenser.api.SkillResource', 'required_skills', full=True, blank=True, null=True)
     grants = fields.ToManyField('sd1_condenser.api.SkillResource', 'grants', full=True, blank=True, null=True)
 
+    def obj_get_list(self, request=None, **kwargs):
+        obj_list = super(SkillResource, self).obj_get_list(request, **kwargs)
+
+        if not request.user.is_superuser and not request.user.is_staff:
+            obj_list = obj_list.filter(playable=True)
+
+        return obj_list
+
     class Meta:
         queryset = Skill.objects.all()
         resource_name = 'skills'
