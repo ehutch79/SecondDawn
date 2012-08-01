@@ -146,6 +146,42 @@ def calculate_cost(current, end):
 
 
 @login_required
+def character_reset(request, slug):
+    char = get_object_or_404(Character, slug=slug)
+    template_name = 'condenser/char_view_attr.html'
+
+    if char.user != request.user and not request.user.is_superuser:
+        return HttpResponseForbidden('You may only edit your own character')
+
+#    if request.method != "POST":
+#        return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': char.slug}))
+    char.free_build = char.free_build + char.build_spent
+    
+    char.build_spent = 0
+    char.is_new = False
+    char.is_updated = True
+    
+    char.blood = 1
+    char.might = 1
+    char.mind  = 1
+    char.finesse = 1
+    char.will  = 1
+
+    char.save()
+
+    for skill in char.skills.all():
+        skill.delete()
+
+    for prof in char.professions.all():
+        prof.delete()
+
+    if not request.is_ajax():
+        return HttpResponseRedirect(reverse('condenser_char_view', kwargs={'slug': char.slug}))
+
+    success = "Your attributes were updated"
+    return HttpResponse(success)
+
+@login_required
 def character_adjust_attributes(request, slug):
     char = get_object_or_404(Character, slug=slug)
     template_name = 'condenser/char_view_attr.html'
