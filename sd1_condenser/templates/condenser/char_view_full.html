@@ -858,7 +858,7 @@
                     <ul class="dropdown-menu">
                         {% if char.can_buy_build and not in_build_blackout %}<li><a data-toggle="modal" data-target="#eeps-popup">Exchange XP for build</a></li>{% endif %}
                         {% if not in_build_blackout %}<li><a data-toggle="modal" data-target="#feats-popup">Buy Feats</a></li>
-                        <li><a href="{% url 'condenser_char_reset' slug=char.slug %}" onclick="return confirm('are you sure?');">Reset Char</a></li>{% endif %}
+                        <!-- <li><a href="{% url 'condenser_char_reset' slug=char.slug %}" onclick="return confirm('are you sure?');">Reset Char</a></li> --> {% endif %}
                         {% if user.is_superuser %}
                             {% if not char.background_approved %}<li><a href="{% url 'condenser_char_approve_bg' slug=char.slug %}">Approve Background</a></li>{% endif %}
                             <li><a>Retire Character</a></li>

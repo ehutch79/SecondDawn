@@ -147,6 +147,8 @@ def calculate_cost(current, end):
 
 @login_required
 def character_reset(request, slug):
+    return False
+    
     char = get_object_or_404(Character, slug=slug)
     template_name = 'condenser/char_view_attr.html'
 
