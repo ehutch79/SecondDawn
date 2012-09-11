@@ -539,5 +539,28 @@ def player_upcoming_events(request, slug):
 
     return HttpResponse('', mimetype="application/json");
 
+@login_required
+def label_form(request):
+    template_name = 'condenser/labels/form.html'
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins may see this page')
+
+    return render_to_response(template_name, { },
+                              context_instance=RequestContext(request))
 
 
+@login_required
+def label_display(request):
+    template_name = 'condenser/labels/display.html'
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('only admins may see this page')
+
+    item_name = request.GET.get('item-name', '')
+    item_type = request.GET.get('item-type', '')
+    item_effects = request.GET.get('item-effects', '')
+
+    return render_to_response(template_name, { 'item_name': item_name,
+                                                'item_type': item_type,
+                                                'item_effects': item_effects,
+                                                'total_range': range(0,16) },
+                              context_instance=RequestContext(request))

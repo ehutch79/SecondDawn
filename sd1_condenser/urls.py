@@ -21,6 +21,9 @@ urlpatterns = patterns('',
     url(r'^player/(?P<slug>[-\w\d]+)/events/$', 'sd1_condenser.views.player_upcoming_events', name='condenser_player_events'),
     
 
+    url(r'^label/$', 'sd1_condenser.views.label_form', name='condenser_labels_form'),
+    url(r'^label/show/$', 'sd1_condenser.views.label_display', name='condenser_labels_dislay'),
+
     url(r'^char/create/$', 'sd1_condenser.views.character_create', name='condenser_char_create'),
 
     url(r'^char/view/(?P<slug>[-\w\d]+)/attr/$', 'sd1_condenser.views.character_adjust_attributes', name='condenser_char_attr_adjust'),

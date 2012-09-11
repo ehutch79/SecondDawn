@@ -1,0 +1,8 @@
+{% load url from future %}
+<form action="{%url 'condenser_labels_dislay' %}">
+    <label>Item Name</label><input type=text name="item-name"><br>
+    <label>Item Type</label><input type=text name="item-type"><br>
+    <label>Item Effect</label><textarea name="item-effects"></textarea>
+<br><br>
+<input type=submit>
+</form>

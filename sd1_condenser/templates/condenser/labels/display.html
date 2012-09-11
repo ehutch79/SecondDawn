@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+<title>{{ item_name }}</title>
+<style>
+.tag {
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 18pt 12pt;
+    width: 23%;
+    border: 1pt solid #000;
+    margin: 2pt;
+
+    text-align: center;
+
+    font-family: "Dirty Ego";
+/*
+    background-image: url(/static/img/tag_watermark.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+*/
+    position: relative;
+}
+
+.watermark {
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    top: 40%;
+    margin-top: -25%;
+}
+
+.item-name {
+    font-size: 26pt;
+}
+
+.item-effect {
+    font-size: 16pt;
+    margin-top: 6pt;
+}
+</style>
+</head>
+<body>
+{% for i in total_range %}
+<div class="tag">
+    <img src="/static/img/tag_watermark.png" class="watermark">
+<div class="item-name">{{ item_name }}</div>
+<div class="item-type">{{ item_type }}</div>
+<div class="item-effect">{{ item_effects }}</div>
+</div>
+{% endfor %}
+</body>
