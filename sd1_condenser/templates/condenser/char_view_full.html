@@ -690,7 +690,7 @@
 
         raise: function(e) {
 
-            if (this.to_buy >= 12 ) { return false }
+            if (this.to_buy >= 10 ) { return false }
             {% if not char.user.eepsbank.eeps %}
                 return false;
             {% else %} 
