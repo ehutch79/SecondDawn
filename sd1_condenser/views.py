@@ -443,20 +443,21 @@ def char_buy_build(request, slug):
         return HttpResponseForbidden('You have already bought build for this character')
 
     to_buy = int(request.POST.get('to_buy', 0))
-    if to_buy > 12:
-        to_buy = 12
+    if to_buy > 10:
+        to_buy = 10
     temp = to_buy
     cost = 0
-    if temp < 9:
-        cost = temp * 100
-    else:
-        cost = 800
-        temp -= 8
-        add_cost = 100
-        while temp:
-            add_cost += 100
-            temp -= 1
-            cost += add_cost
+    # if temp < 9:
+    #     cost = temp * 100
+    # else:
+    #     cost = 800
+    #     temp -= 8
+    #     add_cost = 100
+    #     while temp:
+    #         add_cost += 100
+    #         temp -= 1
+    #         cost += add_cost
+    cost = temp * 100
 
 
     if cost <= char.user.eepsbank.eeps:

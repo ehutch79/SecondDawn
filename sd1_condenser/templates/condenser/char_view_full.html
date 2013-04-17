@@ -656,6 +656,8 @@
         },
 
         get_cost: function(new_total) {
+            return 100;
+
             if (new_total < 9) { 
                 return 100;
             }
@@ -663,6 +665,8 @@
             return (total * 100) + 100;
         },
         get_total_cost: function(total) {
+            return total * 100;
+
             if (total < 9) {
                 return total * 100;
             }
